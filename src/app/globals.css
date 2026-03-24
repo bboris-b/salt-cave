@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cave-black: #0a0a08;
+  --cave-dark: #1a1812;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--cave-black);
+}
+
+@keyframes orb-breathe {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+@keyframes result-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 12px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.animate-result-in {
+  animation: result-in 2s ease-out both;
+}
+
+@keyframes site-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-site-up {
+  animation: site-up 800ms ease-out both;
+}
