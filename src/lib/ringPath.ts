@@ -14,18 +14,20 @@ export function idleDisplacement(noise3D: Noise3, angle: number, tSec: number, a
 }
 
 /**
- * Via di mezzo: curva viva ma non “increspata”; 4 armoniche, tempo tra zen e reattivo.
+ * Onda “Perplexity-like”: poche armoniche basse che viaggiano in fase lungo l’anello,
+ * movimento omogeneo senza increspature ad alta frequenza.
  */
 export function breathWaveshape(angle: number, tSec: number, drive = 1): number {
   const d = Math.max(0, Math.min(1, drive))
-  const speed = 0.52 + d * 0.44
-  const amp = 0.8 + d * 0.22
+  const speed = 0.46 + d * 0.36
+  const amp = 0.88 + d * 0.16
+  const ph = tSec * speed
   const sum =
-    Math.sin(angle * 3 - tSec * 0.74 * speed) * 0.5 * amp +
-    Math.sin(angle * 5 - tSec * 0.52 * speed) * 0.26 * amp +
-    Math.sin(angle * 2 + tSec * 0.34 * speed) * 0.14 * amp +
-    Math.sin(angle * 7 - tSec * 0.6 * speed) * 0.12 * amp
-  return sum * 0.9
+    Math.sin(angle * 2 - ph * 0.58) * 0.44 * amp +
+    Math.sin(angle * 3 - ph * 0.52) * 0.36 * amp +
+    Math.sin(angle * 4 + ph * 0.26) * 0.12 * amp +
+    Math.sin(angle * 5 - ph * 0.38) * 0.1 * amp
+  return sum * 0.94
 }
 
 /** Costruisce path chiuso con quadraticCurveTo; controllo = punto polare a θ medio */

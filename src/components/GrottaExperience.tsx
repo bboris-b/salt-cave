@@ -366,6 +366,7 @@ export function GrottaExperience() {
           calmResult={calmResult}
           micOpen={micOpen}
           settlingProgress={settlingP}
+          ambientOrganicMotion={phase === 'settling' || phase === 'result'}
           dissolveKey={dissolveV}
           onDissolveComplete={onDissolveComplete}
         />

@@ -9,10 +9,10 @@ import { RING_POINT_COUNT, breathWaveshape, buildRingPath, idleDisplacement } fr
 const COL_PINK = '#D4967A'
 const COL_GLOW = '#F0D4B8'
 
-/** Risposta al volume: equilibrio tra reattività e calma. */
+/** Risposta al volume: leggermente più sensibile così il moto resta leggibile e omogeneo col RMS. */
 function visualLevelFromRms(rms: number): number {
   const x = Math.max(0, rms)
-  return Math.min(1, Math.pow(x * 32, 0.49))
+  return Math.min(1, Math.pow(x * 38, 0.52))
 }
 
 export type VoiceRingCanvasProps = {
@@ -24,6 +24,8 @@ export type VoiceRingCanvasProps = {
   calmResult: boolean
   micOpen: boolean
   settlingProgress: number | null
+  /** Settling / risultato: microfono spento ma anello con moto procedurale fluido (stile Perplexity). */
+  ambientOrganicMotion?: boolean
   dissolveKey: number
   onDissolveComplete?: () => void
   reducedMotion?: boolean
@@ -49,6 +51,7 @@ export function VoiceRingCanvas({
   calmResult,
   micOpen,
   settlingProgress,
+  ambientOrganicMotion = false,
   dissolveKey,
   onDissolveComplete,
   reducedMotion,
@@ -75,6 +78,7 @@ export function VoiceRingCanvas({
     calmResult,
     micOpen,
     settlingProgress,
+    ambientOrganicMotion: !!ambientOrganicMotion,
     reducedMotion: !!reducedMotion,
   })
   propsRef.current = {
@@ -83,6 +87,7 @@ export function VoiceRingCanvas({
     calmResult,
     micOpen,
     settlingProgress,
+    ambientOrganicMotion: !!ambientOrganicMotion,
     reducedMotion: !!reducedMotion,
   }
 
@@ -188,6 +193,7 @@ export function VoiceRingCanvas({
         calmResult: calm,
         micOpen: mic,
         settlingProgress: sp,
+        ambientOrganicMotion: ambOrg,
         reducedMotion: rm,
       } = propsRef.current
 
@@ -200,7 +206,7 @@ export function VoiceRingCanvas({
       const tSec = now / 1000
       const raw = rmsRef.current
       const sr = smoothedRmsRef.current
-      const chase = mic && !calm ? 0.52 : rm ? 0.32 : 0.42
+      const chase = mic && !calm ? 0.58 : rm ? 0.32 : 0.42
       smoothedRmsRef.current = sr + (raw - sr) * chase
 
       const inSettling = sp != null
@@ -213,29 +219,51 @@ export function VoiceRingCanvas({
       const visualLevel = visualLevelFromRms(rms)
       const micReactive = mic && bb > 0.008 && breathMult > 0.05
       const idleDamp =
-        micReactive && visualLevel > 0.022 ? Math.max(0.52, 1 - visualLevel * 0.42) : 1
+        micReactive && visualLevel > 0.022 ? Math.max(0.55, 1 - visualLevel * 0.4) : 1
       const idleAmpEff = idleAmp * idleDamp
 
-      const waveAmp = mapRange(visualLevel, 0, 1, 17, 54)
-      const angleShim = visualLevel * 0.092 * Math.sin(tSec * 1.85)
-      const wave = (angle: number) =>
-        effectiveBreathBlend *
-        visualLevel *
-        waveAmp *
-        breathWaveshape(angle + angleShim, tSec, visualLevel)
+      const organicDrive =
+        ambOrg || inSettling
+          ? inSettling
+            ? 0.36 + 0.42 * easeOutExpoBezier(Math.min(1, settling * 1.08))
+            : 0.5 + 0.14 * Math.sin(tSec * 0.58) * Math.sin(tSec * 0.29)
+          : 0
+      const micDrive = effectiveBreathBlend * visualLevel
+      const drive = Math.min(1, micDrive * 1.12 + organicDrive)
+      const waveAmp = mapRange(drive, 0, 1, 15, 48)
+      const angleShim = drive * 0.1 * Math.sin(tSec * 1.55)
+
+      let coherentAmp = 0
+      let coherentHz = 1.35
+      if (micReactive) {
+        coherentAmp = visualLevel * 17
+        coherentHz = 2.02
+      } else if (ambOrg || inSettling) {
+        coherentAmp = 6.8 + 2.4 * Math.sin(tSec * 0.38)
+        coherentHz = 1.22
+      }
+      const coherentPulse = coherentAmp * Math.sin(tSec * coherentHz)
+
+      const wave = (angle: number) => waveAmp * breathWaveshape(angle + angleShim, tSec, drive)
 
       const n3 = noise3D.current
       for (let i = 0; i < RING_POINT_COUNT; i++) {
         const angle = (2 * Math.PI * i) / RING_POINT_COUNT - Math.PI / 2
         const idle = idleDisplacement(n3, angle, tSec, idleAmpEff)
-        displacements[i] = idle + wave(angle)
+        const w = wave(angle)
+        displacements[i] = idle + coherentPulse + w
         const idleE = idleDisplacement(n3, angle, tSec - 0.8, idleAmpEff) * 0.2
-        displacementsEcho[i] = idleE + wave(angle) * 0.34
+        displacementsEcho[i] = idleE + coherentPulse * 0.9 + w * 0.34
         displacementsGlow[i] = displacements[i]
       }
 
-      const activeReactive = micReactive
-      let glowTarget = activeReactive ? 0.085 + visualLevel * 0.38 : 0.06
+      const ambientAlive = ambOrg || inSettling
+      const activeReactive = micReactive || ambientAlive
+      let glowTarget = activeReactive
+        ? micReactive
+          ? 0.085 + visualLevel * 0.38
+          : 0.076 + drive * 0.24
+        : 0.06
       if (inSettling) {
         glowTarget = 0.04 + (glowTarget - 0.04) * (1 - Math.min(1, settling * (2 / 2.5)))
       }
@@ -246,14 +274,23 @@ export function VoiceRingCanvas({
 
       const strokeMain = inSettling
         ? 1.5 + (1.0 - 1.5) * easeOutExpoBezier(Math.min(1, settling * (2 / 2.5)))
-        : 1.28 + visualLevel * 2.45
-      const mainOpacityIdle = 0.75 + (mic ? visualLevel * 0.24 : 0)
+        : 1.28 + visualLevel * 2.45 + (ambientAlive && !micReactive ? drive * 1.2 : 0)
+      const mainOpacityIdle =
+        0.75 + (mic ? visualLevel * 0.24 : 0) + (ambientAlive ? drive * 0.11 : 0)
       const mainOpacity = Math.min(
         0.96,
-        inSettling ? mainOpacityIdle * (1 - settling * 0.12) : mainOpacityIdle + (activeReactive ? visualLevel * 0.13 : 0),
+        inSettling
+          ? mainOpacityIdle * (1 - settling * 0.12)
+          : mainOpacityIdle +
+              (micReactive ? visualLevel * 0.13 : 0) +
+              (ambientAlive && !micReactive ? drive * 0.06 : 0),
       )
 
-      const echoOp = activeReactive ? 0.072 + visualLevel * 0.11 : 0.072
+      const echoOp = activeReactive
+        ? micReactive
+          ? 0.072 + visualLevel * 0.11
+          : 0.078 + drive * 0.1
+        : 0.072
       const scale = 0.7 + 0.3 * easeOutExpoBezier(ent)
       const fadeIn = ent * 0.75
 
