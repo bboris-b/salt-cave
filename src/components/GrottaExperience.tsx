@@ -396,7 +396,7 @@ export function GrottaExperience() {
             showInstructionBlock ? 'opacity-90' : 'opacity-0'
           }`}
         >
-          <span className="font-display text-[clamp(1.5rem,3vw,2.25rem)] font-light leading-tight tracking-wide text-text-primary">
+          <span className="type-display-section leading-tight text-text-primary">
             {instructionText}
           </span>
           {instructionSubline ? (
@@ -419,7 +419,7 @@ export function GrottaExperience() {
           >
             {instructionVisible ? (
               <>
-                <h2 className="font-display text-[clamp(1.5rem,3vw,2.25rem)] font-light leading-tight tracking-wide text-text-primary">
+                <h2 className="type-display-section leading-tight text-text-primary">
                   Respira normalmente
                 </h2>
                 <p className="max-w-[28rem] font-sans text-sm leading-relaxed text-text-secondary">

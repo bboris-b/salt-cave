@@ -462,7 +462,7 @@ export function PrenotazioneSection() {
           <h2
             id="prenotazione-main-heading"
             ref={titleRef}
-            className="font-display text-[clamp(2rem,5vw,3rem)] font-light text-salt-warm"
+            className="type-display-hero text-salt-warm"
           >
             {TITLE}
           </h2>
@@ -491,7 +491,7 @@ export function PrenotazioneSection() {
                     <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
-                <h3 className="font-display text-lg font-normal capitalize text-salt-warm">{monthLabel}</h3>
+                <h3 className="type-display-lead capitalize text-salt-warm">{monthLabel}</h3>
                 <button
                   type="button"
                   onClick={goNextMonth}

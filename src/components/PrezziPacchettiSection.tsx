@@ -320,7 +320,7 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
         <header className="mx-auto max-w-2xl text-center">
           {personalized ? (
             <div className={`transition-opacity duration-[800ms] ease-out ${introReady ? 'opacity-100' : 'opacity-0'}`}>
-              <h2 id="prezzi-heading" className="font-display text-[clamp(1.65rem,3.8vw,2.25rem)] font-normal text-salt-warm">
+              <h2 id="prezzi-heading" className="type-display-section text-salt-warm">
                 Il tuo respiro ci ha raccontato qualcosa
               </h2>
               <p
@@ -332,7 +332,7 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
             </div>
           ) : (
             <div className={introReady ? 'opacity-100' : 'opacity-0'} style={{ transition: 'opacity 800ms ease-out' }}>
-              <h2 id="prezzi-heading" className="font-display text-[clamp(1.65rem,3.8vw,2.25rem)] font-normal text-salt-warm">
+              <h2 id="prezzi-heading" className="type-display-section text-salt-warm">
                 Trova il percorso giusto per te
               </h2>
               <p className="mt-4 font-sans text-sm font-normal leading-relaxed text-text-secondary md:text-[15px]">
@@ -444,8 +444,8 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
                 ref={discoveryRef}
                 className="package-card order-2 flex flex-col rounded-[20px] border border-cave-charcoal bg-cave-dark p-6 transition-[transform,box-shadow] duration-300 [transition-timing-function:cubic-bezier(0.215,0.61,0.355,1)] md:order-2 md:col-start-1 lg:order-1 lg:col-span-1 lg:col-start-auto hover:-translate-y-1.5 hover:shadow-[0_20px_48px_-16px_rgba(0,0,0,0.45)]"
               >
-                <h3 className="font-display text-xl font-light text-text-primary">Scoperta</h3>
-                <p className="mt-2 font-display text-4xl font-light text-salt-pink">€25</p>
+                <h3 className="type-display-card text-text-primary">Scoperta</h3>
+                <p className="type-display-card mt-2 text-salt-pink">€25</p>
                 <p className="mt-1 font-sans text-sm font-normal text-text-muted">Seduta singola · 45 min</p>
                 <ul className="mt-6 flex flex-col gap-3">
                   <CheckLi>Accesso alla grotta</CheckLi>
@@ -470,9 +470,9 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
                 <span className="mb-3 inline-flex w-fit rounded-full bg-salt-pink px-3 py-1 font-sans text-xs font-medium text-cave-black">
                   Consigliato
                 </span>
-                <h3 className="font-display text-xl font-light text-text-primary">Percorso</h3>
+                <h3 className="type-display-card text-text-primary">Percorso</h3>
                 <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <p className="font-display text-4xl font-light text-salt-pink">€185</p>
+                  <p className="type-display-card text-salt-pink">€185</p>
                   <p className="font-sans text-xs font-normal text-text-muted">€18,50/seduta</p>
                 </div>
                 <p className="mt-1 font-sans text-sm font-normal text-text-muted">10 sedute · Il ciclo completo</p>
@@ -497,8 +497,8 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
                 ref={exclusiveRef}
                 className="package-card order-3 flex flex-col rounded-[20px] border border-cave-charcoal bg-cave-dark p-6 transition-[transform,box-shadow] duration-300 [transition-timing-function:cubic-bezier(0.215,0.61,0.355,1)] md:order-3 md:col-start-2 lg:order-3 lg:col-span-1 lg:col-start-auto hover:-translate-y-1.5 hover:shadow-[0_20px_48px_-16px_rgba(0,0,0,0.45)]"
               >
-                <h3 className="font-display text-xl font-light text-text-primary">Esclusiva</h3>
-                <p className="mt-2 font-display text-4xl font-light text-salt-amber">€90</p>
+                <h3 className="type-display-card text-text-primary">Esclusiva</h3>
+                <p className="type-display-card mt-2 text-salt-amber">€90</p>
                 <p className="mt-1 font-sans text-sm font-normal text-text-muted">Grotta privata · 45 min</p>
                 <ul className="mt-6 flex flex-col gap-3">
                   <CheckLi>Grotta tutta per te</CheckLi>
@@ -523,7 +523,7 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
             </p>
 
             <div className="mx-auto mt-16 max-w-md text-center">
-              <p className="font-display text-xl font-normal text-salt-warm">
+              <p className="type-display-card text-salt-warm">
                 Hai scelto il tuo percorso? Ora fermiamo il tuo posto.
               </p>
               <a

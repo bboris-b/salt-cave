@@ -123,7 +123,7 @@ export function Navbar() {
       <div className="mx-auto flex h-[4.25rem] max-w-6xl items-center justify-between gap-4 px-5 lg:px-8">
         <Link
           href="/"
-          className="shrink-0 font-display text-sm font-normal uppercase tracking-[0.08em] text-salt-warm md:text-base"
+          className="type-label-uppercase shrink-0 text-salt-warm md:text-[0.8125rem]"
         >
           Grotta di Sale
         </Link>

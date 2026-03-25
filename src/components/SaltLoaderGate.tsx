@@ -80,7 +80,7 @@ function SaltLoaderActive({ onFinish }: ActiveProps) {
     >
       <p
         ref={logoRef}
-        className="px-6 text-center font-display text-xl font-light tracking-[0.14em] text-salt-warm sm:text-2xl md:text-[1.65rem]"
+        className="type-label-uppercase px-6 text-center text-salt-warm"
         style={{ opacity: 0 }}
       >
         GROTTA DI SALE

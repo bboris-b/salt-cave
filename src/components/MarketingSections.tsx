@@ -26,7 +26,7 @@ export function MarketingSections({ animateIn }: Props) {
       {data ? (
         <section className="mx-auto max-w-3xl border-b border-cave-charcoal/60 px-5 py-10 text-center lg:px-8">
           <PillTag className="mb-4">Dal tuo respiro</PillTag>
-          <p className="font-display text-lg text-salt-warm">{data.headline}</p>
+          <p className="type-display-lead text-salt-warm">{data.headline}</p>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-text-secondary">{data.personalizedMessage}</p>
           <p className="mt-4 text-xs text-text-muted">
             RR {data.respiratoryRate.toFixed(1)}/min · rapporto I:E {data.inhaleExhaleRatio.toFixed(2)}
@@ -39,7 +39,7 @@ export function MarketingSections({ animateIn }: Props) {
           <PillTag>L&apos;esperienza</PillTag>
         </ScrollReveal>
         <div className="mt-6">
-          <h2 className="font-display text-[clamp(1.75rem,4vw,2.5rem)] font-light text-text-primary">
+          <h2 className="type-display-section text-text-primary">
             <SplitText type="words" as="span" className="inline" animate={{ stagger: 0.05, y: 10 }}>
               Un tempo per te, tra luci calde e sale micronizzato.
             </SplitText>
@@ -55,7 +55,7 @@ export function MarketingSections({ animateIn }: Props) {
 
       <section id="benefici" className="mx-auto max-w-3xl scroll-mt-24 border-t border-cave-charcoal/40 px-5 py-24 lg:px-8">
         <ScrollReveal>
-          <h2 className="font-display text-2xl font-light text-salt-warm">Benefici</h2>
+          <h2 className="type-display-section text-salt-warm">Benefici</h2>
         </ScrollReveal>
         <ScrollReveal className="mt-4">
           <p className="text-sm leading-relaxed text-text-secondary">
@@ -73,7 +73,7 @@ export function MarketingSections({ animateIn }: Props) {
 
       <section id="chi-siamo" className="mx-auto max-w-3xl scroll-mt-24 border-t border-cave-charcoal/40 px-5 py-24 lg:px-8">
         <ScrollReveal>
-          <h2 className="font-display text-2xl font-light text-salt-warm">Chi siamo</h2>
+          <h2 className="type-display-section text-salt-warm">Chi siamo</h2>
         </ScrollReveal>
         <ScrollReveal className="mt-4">
           <p className="text-sm text-text-secondary">La nostra grotta di sale — identità e storia del centro.</p>

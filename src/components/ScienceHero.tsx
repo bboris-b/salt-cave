@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef } from 'react'
 import SplitType from 'split-type'
 import { gsap, ScrollTrigger, initGsapPlugins } from '@/lib/gsap-init'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { HeroCaveParticles } from '@/components/HeroCaveVisual'
 
 const TITLE = 'La scienza del sale'
 const LABEL_DURATION = 0.6
@@ -12,96 +13,6 @@ const WORD_DURATION = 0.8
 const AFTER_TITLE_PAUSE = 0.2
 const LINE_STAGGER = 0.08
 const LINE_DURATION = 0.8
-const VISUAL_DURATION = 1.2
-const SUBTITLE_OVERLAP = 0.6
-
-function SaltCrystalVisual() {
-  return (
-    <svg
-      className="h-full w-full"
-      viewBox="0 0 800 450"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden
-    >
-      <defs>
-        <pattern id="salt-hero-grid" width="48" height="48" patternUnits="userSpaceOnUse">
-          <path
-            d="M24 0 L48 12 L48 36 L24 48 L0 36 L0 12 Z"
-            stroke="var(--salt-pink)"
-            strokeOpacity="0.35"
-            strokeWidth="0.6"
-            fill="none"
-          />
-        </pattern>
-        <linearGradient id="salt-hero-fade" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="var(--salt-amber)" stopOpacity="0.45" />
-          <stop offset="100%" stopColor="var(--salt-pink)" stopOpacity="0.25" />
-        </linearGradient>
-      </defs>
-      <rect width="800" height="450" fill="url(#salt-hero-grid)" opacity="0.5" />
-      <g opacity="0.55">
-        <path
-          d="M400 48 L472 140 L400 232 L328 140 Z"
-          stroke="var(--salt-pink)"
-          strokeWidth="1.2"
-          fill="var(--salt-amber)"
-          fillOpacity="0.15"
-        />
-        <path
-          d="M220 120 L288 210 L220 300 L152 210 Z"
-          stroke="var(--salt-amber)"
-          strokeWidth="1"
-          fill="var(--salt-pink)"
-          fillOpacity="0.12"
-        />
-        <path
-          d="M580 160 L652 248 L580 336 L508 248 Z"
-          stroke="var(--salt-pink)"
-          strokeWidth="1"
-          fill="none"
-          strokeOpacity="0.5"
-        />
-        <path
-          d="M120 320 L200 380 L120 420 L40 380 Z"
-          stroke="var(--salt-amber)"
-          strokeOpacity="0.4"
-          strokeWidth="0.9"
-          fill="none"
-        />
-        <path
-          d="M640 60 L720 120 L640 180 L560 120 Z"
-          stroke="var(--salt-pink)"
-          strokeOpacity="0.35"
-          strokeWidth="0.8"
-          fill="none"
-        />
-        <path
-          d="M260 40 L340 100 L260 160 L180 100 Z"
-          stroke="var(--salt-amber)"
-          strokeOpacity="0.45"
-          strokeWidth="0.7"
-          fill="var(--salt-pink)"
-          fillOpacity="0.08"
-        />
-        <path
-          d="M480 280 L560 340 L480 400 L400 340 Z"
-          stroke="var(--salt-pink)"
-          strokeOpacity="0.42"
-          strokeWidth="0.85"
-          fill="none"
-        />
-      </g>
-      <rect
-        width="800"
-        height="450"
-        fill="url(#salt-hero-fade)"
-        opacity="0.35"
-        className="mix-blend-soft-light"
-      />
-    </svg>
-  )
-}
 
 export function ScienceHero() {
   const reduced = usePrefersReducedMotion()
@@ -110,7 +21,9 @@ export function ScienceHero() {
   const titleRef = useRef<HTMLHeadingElement>(null)
   const line1InnerRef = useRef<HTMLSpanElement>(null)
   const line2InnerRef = useRef<HTMLSpanElement>(null)
-  const visualRef = useRef<HTMLDivElement>(null)
+  const heroVisualRef = useRef<HTMLDivElement>(null)
+  const heroVisualInnerRef = useRef<HTMLDivElement>(null)
+  const captionRef = useRef<HTMLElement>(null)
   const arrowWrapRef = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
@@ -120,21 +33,55 @@ export function ScienceHero() {
     const titleEl = titleRef.current
     const l1 = line1InnerRef.current
     const l2 = line2InnerRef.current
-    const visual = visualRef.current
+    const heroVisual = heroVisualRef.current
+    const heroInner = heroVisualInnerRef.current
+    const caption = captionRef.current
     const arrowWrap = arrowWrapRef.current
 
-    if (!section || !label || !titleEl || !l1 || !l2 || !visual || !arrowWrap) return
+    if (!section || !label || !titleEl || !l1 || !l2 || !arrowWrap) return
 
     let split: SplitType | null = null
+    const cleanups: Array<() => void> = []
 
     const ctx = gsap.context(() => {
       if (reduced) {
-        gsap.set([label, l1, l2, visual, arrowWrap], { clearProps: 'all' })
+        gsap.set([label, l1, l2, heroVisual, heroInner, caption, arrowWrap].filter(Boolean), { clearProps: 'all' })
+        gsap.set(titleEl, { clearProps: 'fontVariationSettings' })
         gsap.set(label, { autoAlpha: 1 })
         gsap.set([l1, l2], { yPercent: 0 })
-        gsap.set(visual, { clipPath: 'inset(0% 0% 0% 0%)' })
+        if (heroVisual) gsap.set(heroVisual, { clipPath: 'inset(0% 0% 0% 0%)' })
+        if (heroInner) gsap.set(heroInner, { yPercent: 0 })
+        if (caption) gsap.set(caption, { autoAlpha: 1 })
         gsap.set(arrowWrap, { autoAlpha: 0.4 })
         return
+      }
+
+      if (heroVisual && heroInner && caption) {
+        gsap.set(caption, { autoAlpha: 0 })
+        const revealTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: heroVisual,
+            start: 'top 70%',
+            once: true,
+          },
+        })
+        revealTl.from(heroVisual, {
+          clipPath: 'inset(0 0 100% 0)',
+          duration: 1.4,
+          ease: 'power4.inOut',
+        })
+        revealTl.fromTo(caption, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4 }, '>')
+
+        gsap.to(heroInner, {
+          yPercent: -8,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: heroVisual,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true,
+          },
+        })
       }
 
       split = new SplitType(titleEl, { types: 'words', tagName: 'span' })
@@ -145,18 +92,81 @@ export function ScienceHero() {
         return
       }
 
-      const n = words.length
-      const titleAnimSpan = (n - 1) * WORD_STAGGER + WORD_DURATION
-      const subtitleStart = LABEL_DURATION + titleAnimSpan + AFTER_TITLE_PAUSE
-      const numLines = 2
-      const subtitleTotal = (numLines - 1) * LINE_STAGGER + LINE_DURATION
-      const visualStart = subtitleStart + SUBTITLE_OVERLAP * subtitleTotal
+      const vars = { wght: 300, wonk: 0 }
+      const applyTitleVars = () => {
+        gsap.set(titleEl, {
+          fontVariationSettings: `"wght" ${vars.wght}, "WONK" ${vars.wonk}, "opsz" 72, "SOFT" 0`,
+        })
+      }
+      applyTitleVars()
+
+      const mobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+      const canFineHover =
+        typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches
+
+      let hoverTween: gsap.core.Tween | null = null
+
+      if (mobile) {
+        gsap.to(vars, {
+          wght: 600,
+          ease: 'power2.out',
+          duration: 0.85,
+          onUpdate: applyTitleVars,
+          scrollTrigger: {
+            trigger: titleEl,
+            start: 'top 80%',
+            once: true,
+          },
+        })
+      } else {
+        ScrollTrigger.create({
+          trigger: titleEl,
+          start: 'top 80%',
+          end: 'top 30%',
+          scrub: 1,
+          onUpdate(self) {
+            vars.wght = 300 + 300 * self.progress
+            applyTitleVars()
+          },
+        })
+      }
+
+      if (canFineHover && !mobile) {
+        const onEnter = () => {
+          hoverTween?.kill()
+          hoverTween = gsap.to(vars, {
+            wonk: 1,
+            duration: 0.6,
+            ease: 'power2.out',
+            onUpdate: applyTitleVars,
+          })
+        }
+        const onLeave = () => {
+          hoverTween?.kill()
+          hoverTween = gsap.to(vars, {
+            wonk: 0,
+            duration: 0.6,
+            ease: 'power2.out',
+            onUpdate: applyTitleVars,
+          })
+        }
+        titleEl.addEventListener('mouseenter', onEnter)
+        titleEl.addEventListener('mouseleave', onLeave)
+        cleanups.push(() => {
+          titleEl.removeEventListener('mouseenter', onEnter)
+          titleEl.removeEventListener('mouseleave', onLeave)
+          hoverTween?.kill()
+        })
+      }
 
       gsap.set(label, { autoAlpha: 0 })
       gsap.set(words, { autoAlpha: 0, y: 60 })
       gsap.set([l1, l2], { yPercent: 100 })
-      gsap.set(visual, { clipPath: 'inset(100% 0% 0% 0%)' })
       gsap.set(arrowWrap, { autoAlpha: 0.4 })
+
+      const n = words.length
+      const titleAnimSpan = (n - 1) * WORD_STAGGER + WORD_DURATION
+      const subtitleStart = LABEL_DURATION + titleAnimSpan + AFTER_TITLE_PAUSE
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -190,12 +200,6 @@ export function ScienceHero() {
         { yPercent: 0, duration: LINE_DURATION, ease: 'power4.out' },
         subtitleStart + LINE_STAGGER,
       )
-      tl.fromTo(
-        visual,
-        { clipPath: 'inset(100% 0% 0% 0%)' },
-        { clipPath: 'inset(0% 0% 0% 0%)', duration: VISUAL_DURATION, ease: 'power4.inOut' },
-        visualStart,
-      )
 
       ScrollTrigger.create({
         trigger: section,
@@ -209,6 +213,7 @@ export function ScienceHero() {
     }, section)
 
     return () => {
+      cleanups.forEach((fn) => fn())
       ctx.revert()
       split?.revert()
     }
@@ -218,23 +223,21 @@ export function ScienceHero() {
     <section
       ref={sectionRef}
       id="esperienza"
-      className="mx-auto max-w-[960px] scroll-mt-24 px-5 pb-16 pt-[12vh] md:px-6 md:pb-20 md:pt-[20vh]"
+      className="mx-auto max-w-[1100px] scroll-mt-24 px-5 pb-16 pt-[12vh] md:px-6 md:pb-20 md:pt-[20vh]"
       aria-labelledby="science-hero-title"
     >
       <p
         ref={labelRef}
-        className="mb-5 font-sans text-[11px] font-normal uppercase tracking-[0.2em] text-[var(--text-secondary)] md:mb-6 md:text-xs"
+        className="type-label-uppercase mb-5 text-[var(--text-secondary)] md:mb-6"
       >
         Haloterapia
       </p>
 
-      <h1
-        id="science-hero-title"
-        ref={titleRef}
-        className="max-w-[22ch] font-display text-[clamp(2.15rem,7vw,3.75rem)] font-light leading-[1.08] text-[var(--salt-warm)] md:max-w-none md:text-[clamp(2.75rem,6.2vw,4rem)]"
-      >
-        {TITLE}
-      </h1>
+      <div className="hero-title-var-wrap max-w-[22ch] md:max-w-none">
+        <h1 id="science-hero-title" ref={titleRef} className="type-display-hero text-[var(--salt-warm)]">
+          {TITLE}
+        </h1>
+      </div>
 
       <div className="mt-8 max-w-[600px] space-y-0 md:mt-10">
         <div className="overflow-hidden font-sans text-lg font-normal leading-snug text-[var(--text-primary)] md:text-[18px] md:leading-relaxed">
@@ -247,11 +250,24 @@ export function ScienceHero() {
         </div>
       </div>
 
-      <figure className="mt-12 w-full md:mt-14">
-        <div ref={visualRef} className="relative aspect-[4/3] w-full overflow-hidden rounded-sm bg-cave-dark md:aspect-video">
-          <SaltCrystalVisual />
+      <figure className="relative z-0 mx-auto mt-12 w-full md:mt-14">
+        <div
+          ref={heroVisualRef}
+          className="hero-visual relative mx-auto w-full overflow-hidden rounded-2xl bg-cave-black max-md:aspect-[4/3] max-md:max-h-[50vh] max-md:min-h-[180px] md:h-[60vh] md:max-h-[600px] md:min-h-[260px]"
+        >
+          <div ref={heroVisualInnerRef} className="hero-visual-inner absolute inset-0 scale-[1.15] will-change-transform">
+            <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
+              <div className="hero-visual-glow-radial" />
+            </div>
+            <div className="hero-visual-grain pointer-events-none absolute inset-0 z-[1]" aria-hidden />
+            <HeroCaveParticles />
+            {/* Layer 3: quando disponibile, aggiungere <img className="absolute inset-0 z-[3] h-full w-full object-cover" alt="..." src="..." /> */}
+          </div>
         </div>
-        <figcaption className="mt-3 max-w-xl font-sans text-xs font-normal leading-relaxed text-[var(--text-muted)] md:text-[13px]">
+        <figcaption
+          ref={captionRef}
+          className="mt-3 max-w-xl font-sans text-xs font-normal leading-relaxed text-[var(--text-muted)] md:text-[13px]"
+        >
           Sale Rosa dell&apos;Himalaya, nebulizzato a particelle microscopiche
         </figcaption>
       </figure>

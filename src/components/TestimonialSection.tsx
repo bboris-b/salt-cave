@@ -272,12 +272,12 @@ export function TestimonialSection() {
       </span>
       <blockquote className="relative mt-6 flex-1">
         <span
-          className="pointer-events-none absolute -left-1 -top-3 font-display text-[4.5rem] font-normal leading-none text-salt-pink/[0.2] md:text-[5rem]"
+          className="type-display-deco pointer-events-none absolute -left-1 -top-3 text-[4.5rem] leading-none text-salt-pink/[0.2] md:text-[5rem]"
           aria-hidden
         >
           &ldquo;
         </span>
-        <p className="relative z-[1] font-display text-lg font-normal italic leading-relaxed text-text-primary">
+        <p className="type-display-lead relative z-[1] italic leading-relaxed text-text-primary">
           {TESTIMONIALS[i].quote}
         </p>
       </blockquote>
@@ -299,7 +299,7 @@ export function TestimonialSection() {
         <h2
           id="testimonial-title"
           ref={titleRef}
-          className="max-w-[20ch] font-display text-[clamp(1.75rem,4vw,2.5rem)] font-normal text-salt-warm md:max-w-none"
+          className="type-display-section max-w-[20ch] text-salt-warm md:max-w-none"
         >
           {TITLE}
         </h2>

@@ -143,6 +143,143 @@ html.salt-cave-reduced-motion .hero-scroll-hint {
   animation: none;
 }
 
+/* Hero Stanza 2 — visual grotta (layer glow + grain) */
+@keyframes hero-cave-glow-breathe {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-3%);
+  }
+}
+
+.hero-visual-glow-radial {
+  position: absolute;
+  left: 50%;
+  bottom: -22%;
+  width: 145%;
+  height: 135%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 90% 72% at 50% 70%,
+    color-mix(in srgb, var(--salt-amber) 8%, transparent) 0%,
+    var(--cave-black) 68%,
+    var(--cave-black) 100%
+  );
+  animation: hero-cave-glow-breathe 8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-visual-glow-radial {
+    animation: none;
+    transform: translateX(-50%);
+  }
+}
+
+html.salt-cave-reduced-motion .hero-visual-glow-radial {
+  animation: none;
+  transform: translateX(-50%);
+}
+
+.hero-visual-grain {
+  overflow: hidden;
+}
+
+.hero-visual-grain::after {
+  content: '';
+  position: absolute;
+  inset: -120%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* —— Display (Fraunces variable) —— */
+.type-display-hero {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  font-variation-settings: 'wght' 300, 'opsz' 72, 'WONK' 0, 'SOFT' 0;
+  font-weight: unset;
+}
+
+.type-display-section {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-variation-settings: 'wght' 500, 'opsz' 36, 'WONK' 0, 'SOFT' 0;
+  font-weight: unset;
+}
+
+.type-display-card {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  line-height: 1.2;
+  font-variation-settings: 'wght' 600, 'opsz' 24, 'WONK' 0, 'SOFT' 0;
+  font-weight: unset;
+}
+
+/* Sottotitoli display ~ body di sezione (tra card e section) */
+.type-display-lead {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: 1.125rem;
+  line-height: 1.35;
+  font-variation-settings: 'wght' 500, 'opsz' 28, 'WONK' 0, 'SOFT' 0;
+  font-weight: unset;
+}
+
+/* Virgolette / decorazioni display grandi */
+.type-display-deco {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-variation-settings: 'wght' 400, 'opsz' 72, 'WONK' 0.5, 'SOFT' 0;
+  font-weight: unset;
+}
+
+/* Label uppercase: MAI Fraunces in uppercase — DM Sans */
+.type-label-uppercase {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Hero titolo: mitigazione reflow durante animazione assi */
+.hero-title-var-wrap {
+  will-change: contents;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .type-display-hero,
+  .type-display-section,
+  .type-display-card,
+  .type-display-lead,
+  .type-display-deco {
+    font-variation-settings: 'wght' 500, 'opsz' 72, 'WONK' 0, 'SOFT' 0;
+  }
+
+  .hero-title-var-wrap {
+    will-change: auto;
+  }
+}
+
+html.salt-cave-reduced-motion .type-display-hero,
+html.salt-cave-reduced-motion .type-display-section,
+html.salt-cave-reduced-motion .type-display-card,
+html.salt-cave-reduced-motion .type-display-lead,
+html.salt-cave-reduced-motion .type-display-deco {
+  font-variation-settings: 'wght' 500, 'opsz' 72, 'WONK' 0, 'SOFT' 0;
+}
+
+html.salt-cave-reduced-motion .hero-title-var-wrap {
+  will-change: auto;
+}
+
 /* Prenotazione — ingresso mese calendario */
 @keyframes booking-cal-enter-right {
   from {

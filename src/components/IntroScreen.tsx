@@ -31,7 +31,7 @@ export function IntroScreen({ variant = 'default', onSkipToSite }: IntroScreenPr
             WebkitBackdropFilter: 'blur(20px)',
           }}
         >
-          <h1 className="font-display text-[clamp(1.75rem,4vw,2.35rem)] font-light tracking-wide text-salt-warm">
+          <h1 className="type-display-section text-salt-warm">
             Grotta di Sale
           </h1>
           <p className="mt-2 font-sans text-base font-normal text-text-secondary">Un&apos;esperienza per il tuo respiro</p>

@@ -22,10 +22,10 @@ export function ContenutoPlaceholder({ animateIn }: Props) {
   return (
     <main
       className={`flex min-h-dvh flex-col items-center justify-center bg-transparent px-6 text-center font-sans ${
-        animateIn ? 'animate-site-up' : ''
+          animateIn ? 'animate-site-up' : ''
       }`}
     >
-      <h1 className="max-w-lg font-display text-[clamp(1.5rem,4vw,2.25rem)] font-light leading-snug tracking-wide text-salt-warm">
+      <h1 className="type-display-section max-w-lg leading-snug text-salt-warm">
         45 minuti nella nostra grotta = 3 giorni di mare
       </h1>
       <p className="mt-4 max-w-md text-sm text-text-secondary">Continua a seguirci — il sito completo è in arrivo</p>

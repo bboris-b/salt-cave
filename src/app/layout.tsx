@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { DM_Sans, Fraunces } from 'next/font/google'
 import { AtmosphereRoot } from '@/components/AtmosphereRoot'
 import { JsonLdScripts } from '@/components/JsonLd'
 import { SaltLoaderGate } from '@/components/SaltLoaderGate'
@@ -10,10 +10,12 @@ import './globals.css'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
-const cormorant = Cormorant_Garamond({
+const fraunces = Fraunces({
   subsets: ['latin'],
-  weight: ['300', '400'],
-  variable: '--font-cormorant',
+  weight: 'variable',
+  style: ['normal', 'italic'],
+  axes: ['WONK', 'SOFT', 'opsz'],
+  variable: '--font-display',
   display: 'swap',
   preload: true,
 })
@@ -69,7 +71,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="it" className={`${cormorant.variable} ${dmSans.variable}`}>
+    <html lang="it" className={`${fraunces.variable} ${dmSans.variable}`}>
       <body className="font-sans antialiased">
         <JsonLdScripts />
         <SaltLoaderGate />

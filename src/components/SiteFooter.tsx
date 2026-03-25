@@ -125,7 +125,7 @@ export function SiteFooter() {
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4 lg:gap-10">
           {/* Brand */}
           <div>
-            <p className="font-display text-lg font-normal tracking-[0.12em] text-salt-warm">GROTTA DI SALE</p>
+            <p className="type-label-uppercase text-salt-warm">GROTTA DI SALE</p>
             <p className="mt-3 max-w-xs font-sans text-sm font-normal leading-relaxed text-text-secondary">
               Il tuo rifugio di sale nel cuore di Roma
             </p>

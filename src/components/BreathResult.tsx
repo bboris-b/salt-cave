@@ -20,7 +20,7 @@ export function BreathResult({ insight, visible, staggerStep, onDiscover }: Prop
     >
       <div className="w-full max-w-[min(90vw,400px)] text-center">
         <p
-          className={`font-display text-[clamp(1.5rem,3vw,2.25rem)] font-normal leading-tight tracking-wide text-salt-warm transition-all duration-[800ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] ${
+          className={`type-display-section leading-tight text-salt-warm transition-all duration-[800ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] ${
             staggerStep >= 1 ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'
           }`}
         >
