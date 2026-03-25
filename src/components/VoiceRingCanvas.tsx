@@ -9,6 +9,12 @@ import { RING_POINT_COUNT, breathWaveshape, buildRingPath, idleDisplacement } fr
 const COL_PINK = '#D4967A'
 const COL_GLOW = '#F0D4B8'
 
+/** Curva per rendere visibili RMS bassi (~0.02–0.12) senza saturare sui picchi. */
+function visualLevelFromRms(rms: number): number {
+  const x = Math.max(0, rms)
+  return Math.min(1, Math.pow(x * 20, 0.55))
+}
+
 export type VoiceRingCanvasProps = {
   rmsRef: MutableRefObject<number>
   ringEntrance: number
@@ -194,7 +200,7 @@ export function VoiceRingCanvas({
       const tSec = now / 1000
       const raw = rmsRef.current
       const sr = smoothedRmsRef.current
-      smoothedRmsRef.current = sr + (raw - sr) * (rm ? 0.25 : 0.12)
+      smoothedRmsRef.current = sr + (raw - sr) * (rm ? 0.28 : 0.26)
 
       const inSettling = sp != null
       const settling = sp ?? 0
@@ -202,22 +208,29 @@ export function VoiceRingCanvas({
       const idleAmp = inSettling ? 3 + (1.5 - 3) * easeOutExpoBezier(Math.min(1, settling)) : 3
       const effectiveBreathBlend = bb * breathMult
 
-      const amplitude = mapRange(smoothedRmsRef.current, 0, 0.5, 0, 35)
+      const rms = smoothedRmsRef.current
+      const visualLevel = visualLevelFromRms(rms)
+      const micReactive = mic && bb > 0.02 && breathMult > 0.05
+      const idleDamp =
+        micReactive && visualLevel > 0.04 ? Math.max(0.55, 1 - visualLevel * 0.42) : 1
+      const idleAmpEff = idleAmp * idleDamp
+
+      const waveAmp = mapRange(visualLevel, 0, 1, 10, 46)
       const wave = (angle: number) =>
-        effectiveBreathBlend * smoothedRmsRef.current * amplitude * breathWaveshape(angle, tSec)
+        effectiveBreathBlend * visualLevel * waveAmp * breathWaveshape(angle, tSec)
 
       const n3 = noise3D.current
       for (let i = 0; i < RING_POINT_COUNT; i++) {
         const angle = (2 * Math.PI * i) / RING_POINT_COUNT - Math.PI / 2
-        const idle = idleDisplacement(n3, angle, tSec, idleAmp)
+        const idle = idleDisplacement(n3, angle, tSec, idleAmpEff)
         displacements[i] = idle + wave(angle)
-        const idleE = idleDisplacement(n3, angle, tSec - 0.8, idleAmp) * 0.2
-        displacementsEcho[i] = idleE + wave(angle) * 0.2
+        const idleE = idleDisplacement(n3, angle, tSec - 0.8, idleAmpEff) * 0.2
+        displacementsEcho[i] = idleE + wave(angle) * 0.35
         displacementsGlow[i] = displacements[i]
       }
 
-      const activeReactive = mic && bb > 0.02 && breathMult > 0.05
-      let glowTarget = activeReactive ? 0.06 + Math.min(1, smoothedRmsRef.current * 2) * 0.12 : 0.06
+      const activeReactive = micReactive
+      let glowTarget = activeReactive ? 0.07 + visualLevel * 0.34 : 0.06
       if (inSettling) {
         glowTarget = 0.04 + (glowTarget - 0.04) * (1 - Math.min(1, settling * (2 / 2.5)))
       }
@@ -226,14 +239,14 @@ export function VoiceRingCanvas({
 
       const strokeMain = inSettling
         ? 1.5 + (1.0 - 1.5) * easeOutExpoBezier(Math.min(1, settling * (2 / 2.5)))
-        : 1.5 + smoothedRmsRef.current * 0.5
-      const mainOpacityIdle = 0.75 + (mic ? smoothedRmsRef.current * 0.15 : 0)
+        : 1.35 + visualLevel * 2.4
+      const mainOpacityIdle = 0.76 + (mic ? visualLevel * 0.22 : 0)
       const mainOpacity = Math.min(
-        0.95,
-        inSettling ? mainOpacityIdle * (1 - settling * 0.12) : mainOpacityIdle + (activeReactive ? smoothedRmsRef.current * 0.2 : 0),
+        0.96,
+        inSettling ? mainOpacityIdle * (1 - settling * 0.12) : mainOpacityIdle + (activeReactive ? visualLevel * 0.18 : 0),
       )
 
-      const echoOp = activeReactive ? 0.08 + smoothedRmsRef.current * 0.04 : 0.08
+      const echoOp = activeReactive ? 0.07 + visualLevel * 0.14 : 0.08
       const scale = 0.7 + 0.3 * easeOutExpoBezier(ent)
       const fadeIn = ent * 0.75
 

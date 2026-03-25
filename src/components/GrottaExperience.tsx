@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { AudioAnalyzer } from '@/lib/AudioAnalyzer'
+import { AudioAnalyzer, type AudioStartFailureReason } from '@/lib/AudioAnalyzer'
 import { BreathCycleDetector, summarizeBreaths } from '@/lib/breathAnalysis'
 import { getBreathMessage, type BreathInsight } from '@/lib/breathPatterns'
 import { easeOutExpoBezier } from '@/lib/easing'
@@ -18,6 +18,22 @@ const SESSION_MS = 60_000
 const NOISE_RMS_THRESHOLD = 0.11
 const MIN_CYCLES = 5
 const SETTLE_MS = 2500
+
+function micDeniedCopy(reason: AudioStartFailureReason | null): string {
+  switch (reason) {
+    case 'no_audio_track':
+      return 'Il browser non ha trovato un microfono nel dispositivo. Collega un microfono o controlla le impostazioni di sistema, poi riprova.'
+    case 'track_not_live':
+      return 'La sorgente microfono non risulta attiva. Chiudi altre app che usano il microfono e riprova.'
+    case 'audio_context_blocked':
+      return 'L’audio della pagina non è partito (spesso serve un secondo tocco sullo schermo). Tocca di nuovo «Riprova» o ricarica la pagina.'
+    case 'pipeline_silent':
+      return 'Il microfono risulta autorizzato, ma non riceviamo variazioni dal segnale. Controlla che non sia mutato, che il browser usi il microfono giusto nelle impostazioni del sito, e prova con cuffie o auricolari.'
+    case 'permission_denied':
+    default:
+      return 'Non abbiamo accesso al microfono. Puoi comunque scoprire la nostra grotta sul sito.'
+  }
+}
 
 type Phase =
   | 'entering'
@@ -50,6 +66,7 @@ export function GrottaExperience() {
   const [iniziaVisible, setIniziaVisible] = useState(false)
   const [iniziaHiding, setIniziaHiding] = useState(false)
   const [resultFadingOut, setResultFadingOut] = useState(false)
+  const [micBlockReason, setMicBlockReason] = useState<AudioStartFailureReason | null>(null)
 
   const experienceT0 = useRef<number | null>(null)
   const analyzerRef = useRef<AudioAnalyzer | null>(null)
@@ -204,13 +221,25 @@ export function GrottaExperience() {
     window.setTimeout(() => setIniziaVisible(false), 400)
     const a = new AudioAnalyzer()
     analyzerRef.current = a
-    const ok = await a.start()
-    if (!ok) {
+    const result = await a.start()
+    if (!result.ok) {
+      a.stop()
+      analyzerRef.current = null
       setIniziaHiding(false)
+      setIniziaVisible(true)
+      setMicBlockReason(result.reason)
       setPhase('mic_denied')
       return
     }
+    setMicBlockReason(null)
     setPhase('noise_calib')
+  }
+
+  const retryMic = () => {
+    setMicBlockReason(null)
+    setPhase('await_mic')
+    setIniziaVisible(true)
+    setIniziaHiding(false)
   }
 
   const onNoiseContinue = () => {
@@ -250,6 +279,13 @@ export function GrottaExperience() {
           : phase === 'session'
             ? 'Respira normalmente per un minuto…'
             : ''
+
+  const instructionSubline =
+    phase === 'session'
+      ? "L'anello reagisce al volume che entra nel microfono. Se lo vedi quasi fermo, avvicinati o prova un «sss» tenue; cuffie o auricolari evitano che il suono delle casse copra il respiro."
+      : phase === 'noise_calib'
+        ? 'Cuffie o auricolari evitano che il suono delle casse torni nel microfono e rendono la lettura più stabile.'
+        : ''
 
   const showInstructionBlock =
     instructionVisible &&
@@ -296,11 +332,18 @@ export function GrottaExperience() {
 
       {showFloatingInstruction && (
         <div
-          className={`pointer-events-none absolute left-1/2 top-[calc(42%+min(32vw,120px))] z-[2] w-[min(92vw,420px)] -translate-x-1/2 text-center font-display text-[clamp(1.5rem,3vw,2.25rem)] font-light leading-tight tracking-wide text-text-primary transition-opacity duration-[600ms] ease-out ${
+          className={`pointer-events-none absolute left-1/2 top-[calc(42%+min(32vw,120px))] z-[2] w-[min(92vw,420px)] -translate-x-1/2 text-center transition-opacity duration-[600ms] ease-out ${
             showInstructionBlock ? 'opacity-90' : 'opacity-0'
           }`}
         >
-          <span>{instructionText}</span>
+          <span className="font-display text-[clamp(1.5rem,3vw,2.25rem)] font-light leading-tight tracking-wide text-text-primary">
+            {instructionText}
+          </span>
+          {instructionSubline ? (
+            <p className="mx-auto mt-4 max-w-[26rem] font-sans text-xs leading-relaxed text-text-muted">
+              {instructionSubline}
+            </p>
+          ) : null}
         </div>
       )}
 
@@ -321,7 +364,11 @@ export function GrottaExperience() {
                 </h2>
                 <p className="max-w-[28rem] font-sans text-sm leading-relaxed text-text-secondary">
                   Ti chiederemo il microfono per un attimo di calibrazione del rumore di fondo. Poi l&apos;anello ti
-                  accompagnerà per circa un minuto: non serve forzare il ritmo, segui te stesso.
+                  accompagnerà per circa un minuto: non serve forzare il ritmo, segui te stesso.{' '}
+                  <span className="text-text-muted">
+                    Se puoi, usa cuffie o auricolari: riducono il ritorno audio dalle casse e il cerchio risponde in
+                    modo più chiaro.
+                  </span>
                 </p>
               </>
             ) : null}
@@ -352,7 +399,8 @@ export function GrottaExperience() {
         <div className="absolute bottom-[calc(16%+env(safe-area-inset-bottom))] left-1/2 z-[3] flex w-[min(92vw,360px)] -translate-x-1/2 flex-col gap-3 text-center">
           <p className="font-sans text-sm text-text-secondary">
             Il rumore di fondo è alto (~{(noiseCalibAvg ?? 0).toFixed(2)} RMS). Per un risultato più affidabile prova in
-            un luogo più silenzioso.
+            un luogo più silenzioso e, se puoi, cuffie o auricolari per evitare che il suono del dispositivo entri nel
+            microfono.
           </p>
           <button
             type="button"
@@ -384,24 +432,32 @@ export function GrottaExperience() {
 
       {phase === 'mic_denied' && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-6 bg-cave-black/90 px-6 text-center">
-          <p className="max-w-md font-sans text-text-secondary">
-            Non abbiamo accesso al microfono. Puoi comunque scoprire la nostra grotta sul sito.
-          </p>
-          <button
-            type="button"
-            onClick={goToContenuto}
-            className="rounded-full border border-salt-pink bg-transparent px-8 py-3 font-sans text-sm font-medium text-salt-pink hover:bg-salt-pink hover:text-cave-black"
-          >
-            Vai al sito
-          </button>
+          <p className="max-w-md font-sans text-text-secondary">{micDeniedCopy(micBlockReason)}</p>
+          <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-4">
+            <button
+              type="button"
+              onClick={retryMic}
+              className="rounded-full border border-salt-pink bg-salt-pink px-8 py-3 font-sans text-sm font-medium text-cave-black hover:opacity-90"
+            >
+              Riprova
+            </button>
+            <button
+              type="button"
+              onClick={goToContenuto}
+              className="rounded-full border border-salt-pink bg-transparent px-8 py-3 font-sans text-sm font-medium text-salt-pink hover:bg-salt-pink hover:text-cave-black"
+            >
+              Vai al sito
+            </button>
+          </div>
         </div>
       )}
 
       {phase === 'breath_fail' && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-6 bg-cave-black/90 px-6 text-center">
           <p className="max-w-md font-sans text-text-secondary">
-            Non siamo riusciti a rilevare il tuo respiro con chiarezza. Prova in un ambiente più silenzioso, o prosegui
-            verso il nostro sito.
+            Non siamo riusciti a rilevare il tuo respiro con chiarezza. Prova in un ambiente più silenzioso, con cuffie o
+            auricolari (evitano che le casse coprano il microfono) e microfono più vicino alla bocca; altrimenti puoi
+            proseguire verso il nostro sito.
           </p>
           <button
             type="button"

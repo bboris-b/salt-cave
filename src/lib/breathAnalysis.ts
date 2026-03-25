@@ -37,7 +37,8 @@ export class BreathCycleDetector {
     }
     if (!this.calibrated && tSec >= this.calibWindowMs / 1000) {
       const { mean, std } = meanStd(this.calibration)
-      this.threshold = Math.max(0.04, mean + 2 * std)
+      /* Leggermente più sensibile: il respiro al microfono è spesso sotto soglia se troppo conservativa. */
+      this.threshold = Math.max(0.035, mean + 1.65 * std)
       this.calibrated = true
     }
     if (!this.calibrated) return
