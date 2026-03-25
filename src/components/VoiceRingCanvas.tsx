@@ -9,10 +9,10 @@ import { RING_POINT_COUNT, breathWaveshape, buildRingPath, idleDisplacement } fr
 const COL_PINK = '#D4967A'
 const COL_GLOW = '#F0D4B8'
 
-/** Curva per rendere visibili RMS bassi (~0.02–0.12) senza saturare sui picchi. */
+/** Curva aggressiva sui bassi livelli: respiro lontano dal microfono resta leggibile. */
 function visualLevelFromRms(rms: number): number {
   const x = Math.max(0, rms)
-  return Math.min(1, Math.pow(x * 20, 0.55))
+  return Math.min(1, Math.pow(x * 34, 0.48))
 }
 
 export type VoiceRingCanvasProps = {
@@ -200,7 +200,8 @@ export function VoiceRingCanvas({
       const tSec = now / 1000
       const raw = rmsRef.current
       const sr = smoothedRmsRef.current
-      smoothedRmsRef.current = sr + (raw - sr) * (rm ? 0.28 : 0.26)
+      const chase = mic && !calm ? 0.62 : rm ? 0.32 : 0.48
+      smoothedRmsRef.current = sr + (raw - sr) * chase
 
       const inSettling = sp != null
       const settling = sp ?? 0
@@ -210,14 +211,24 @@ export function VoiceRingCanvas({
 
       const rms = smoothedRmsRef.current
       const visualLevel = visualLevelFromRms(rms)
-      const micReactive = mic && bb > 0.02 && breathMult > 0.05
+      const micReactive = mic && bb > 0.008 && breathMult > 0.05
       const idleDamp =
-        micReactive && visualLevel > 0.04 ? Math.max(0.55, 1 - visualLevel * 0.42) : 1
+        micReactive && visualLevel > 0.018 ? Math.max(0.42, 1 - visualLevel * 0.52) : 1
       const idleAmpEff = idleAmp * idleDamp
 
-      const waveAmp = mapRange(visualLevel, 0, 1, 10, 46)
+      const waveAmp = mapRange(visualLevel, 0, 1, 24, 72)
+      const angleShim = visualLevel * 0.18 * Math.sin(tSec * 5.5)
+      const tRipple = tSec * (6.2 + visualLevel * 5)
+      const microRipple =
+        micReactive && visualLevel > 0.02
+          ? Math.sin(tRipple) * (1.8 + visualLevel * 5.5) * effectiveBreathBlend * visualLevel
+          : 0
       const wave = (angle: number) =>
-        effectiveBreathBlend * visualLevel * waveAmp * breathWaveshape(angle, tSec)
+        effectiveBreathBlend *
+          visualLevel *
+          waveAmp *
+          breathWaveshape(angle + angleShim, tSec, visualLevel) +
+        microRipple * Math.sin(angle * 11 + tSec * 2.8)
 
       const n3 = noise3D.current
       for (let i = 0; i < RING_POINT_COUNT; i++) {
@@ -225,28 +236,30 @@ export function VoiceRingCanvas({
         const idle = idleDisplacement(n3, angle, tSec, idleAmpEff)
         displacements[i] = idle + wave(angle)
         const idleE = idleDisplacement(n3, angle, tSec - 0.8, idleAmpEff) * 0.2
-        displacementsEcho[i] = idleE + wave(angle) * 0.35
+        displacementsEcho[i] = idleE + wave(angle) * 0.48
         displacementsGlow[i] = displacements[i]
       }
 
       const activeReactive = micReactive
-      let glowTarget = activeReactive ? 0.07 + visualLevel * 0.34 : 0.06
+      let glowTarget = activeReactive ? 0.09 + visualLevel * 0.45 : 0.06
       if (inSettling) {
         glowTarget = 0.04 + (glowTarget - 0.04) * (1 - Math.min(1, settling * (2 / 2.5)))
       }
-      glowDisplayRef.current += (glowTarget - glowDisplayRef.current) * 0.06
-      glowSlowRef.current += (glowTarget - glowSlowRef.current) * 0.04
+      const glowChase = micReactive ? 0.16 : 0.1
+      const glowChaseSlow = micReactive ? 0.1 : 0.065
+      glowDisplayRef.current += (glowTarget - glowDisplayRef.current) * glowChase
+      glowSlowRef.current += (glowTarget - glowSlowRef.current) * glowChaseSlow
 
       const strokeMain = inSettling
         ? 1.5 + (1.0 - 1.5) * easeOutExpoBezier(Math.min(1, settling * (2 / 2.5)))
-        : 1.35 + visualLevel * 2.4
-      const mainOpacityIdle = 0.76 + (mic ? visualLevel * 0.22 : 0)
+        : 1.2 + visualLevel * 3.1
+      const mainOpacityIdle = 0.74 + (mic ? visualLevel * 0.28 : 0)
       const mainOpacity = Math.min(
         0.96,
         inSettling ? mainOpacityIdle * (1 - settling * 0.12) : mainOpacityIdle + (activeReactive ? visualLevel * 0.18 : 0),
       )
 
-      const echoOp = activeReactive ? 0.07 + visualLevel * 0.14 : 0.08
+      const echoOp = activeReactive ? 0.08 + visualLevel * 0.2 : 0.08
       const scale = 0.7 + 0.3 * easeOutExpoBezier(ent)
       const fadeIn = ent * 0.75
 

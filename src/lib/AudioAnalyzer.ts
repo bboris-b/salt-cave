@@ -1,7 +1,7 @@
 import { rmsFromByteTimeDomain } from './audioUtils'
 
-/** Più alto = risposta più rapida al microfono (UI + detector leggono questo valore). */
-const SMOOTH = 0.22
+/** Tracking veloce: picchi di respiro altrimenti smorzati troppo per il detector. */
+const SMOOTH = 0.32
 
 export type AudioStartFailureReason =
   | 'permission_denied'
@@ -35,6 +35,8 @@ export class AudioAnalyzer {
   private stream: MediaStream | null = null
   private data: Uint8Array | null = null
   private smoothed = 0
+  /** Ultimo RMS grezzo (stesso campione del tick), utile per non perdere picchi nel respiro debole. */
+  private lastRaw = 0
   private raf = 0
   private running = false
 
@@ -94,6 +96,7 @@ export class AudioAnalyzer {
       if (!this.running || !this.analyser || !this.data) return
       this.analyser.getByteTimeDomainData(this.data as Uint8Array<ArrayBuffer>)
       const raw = rmsFromByteTimeDomain(this.data)
+      this.lastRaw = raw
       this.smoothed += (raw - this.smoothed) * SMOOTH
       this.raf = requestAnimationFrame(tick)
     }
@@ -104,6 +107,11 @@ export class AudioAnalyzer {
   /** Valore lisciato, aggiornato ogni frame nel loop interno */
   getSmoothedRMS(): number {
     return this.smoothed
+  }
+
+  /** RMS dell’ultimo frame (aggiornato nel tick interno). */
+  getLastRawRMS(): number {
+    return this.lastRaw
   }
 
   /** Un campione RMS non lisciato (richiede analyser attivo) */
@@ -124,5 +132,6 @@ export class AudioAnalyzer {
     this.analyser = null
     this.data = null
     this.smoothed = 0
+    this.lastRaw = 0
   }
 }

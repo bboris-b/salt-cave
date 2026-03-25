@@ -16,7 +16,7 @@ const RING_IN_MS = 1200
 const NOISE_PRE_MS = 2000
 const SESSION_MS = 60_000
 const NOISE_RMS_THRESHOLD = 0.11
-const MIN_CYCLES = 5
+const MIN_CYCLES = 4
 const SETTLE_MS = 2500
 
 function micDeniedCopy(reason: AudioStartFailureReason | null): string {
@@ -77,7 +77,14 @@ export function GrottaExperience() {
   useEffect(() => {
     let id = 0
     const loop = () => {
-      rmsRef.current = analyzerRef.current?.getSmoothedRMS() ?? 0
+      const a = analyzerRef.current
+      if (a) {
+        const s = a.getSmoothedRMS()
+        const r = a.getLastRawRMS()
+        rmsRef.current = Math.max(s, r * 0.94)
+      } else {
+        rmsRef.current = 0
+      }
       id = requestAnimationFrame(loop)
     }
     id = requestAnimationFrame(loop)
@@ -170,7 +177,9 @@ export function GrottaExperience() {
       const p = Math.min(1, elapsed / SESSION_MS)
       setSessionProgress(p)
       const tSec = elapsed / 1000
-      detectorRef.current.processSample(rmsRef.current, tSec)
+      const a = analyzerRef.current
+      const breathDrive = a ? Math.max(a.getSmoothedRMS(), a.getLastRawRMS() * 0.96) : 0
+      detectorRef.current.processSample(breathDrive, tSec)
       if (elapsed >= SESSION_MS) {
         finishSession()
         return

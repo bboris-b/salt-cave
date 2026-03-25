@@ -37,15 +37,16 @@ export class BreathCycleDetector {
     }
     if (!this.calibrated && tSec >= this.calibWindowMs / 1000) {
       const { mean, std } = meanStd(this.calibration)
-      /* Leggermente più sensibile: il respiro al microfono è spesso sotto soglia se troppo conservativa. */
-      this.threshold = Math.max(0.035, mean + 1.65 * std)
+      /* Soglia bassa: inspirazione leggera + RMS lieve; σ spesso piccolo in stanza silenziosa. */
+      this.threshold = Math.max(0.024, mean + 1.1 * std)
       this.calibrated = true
     }
     if (!this.calibrated) return
 
-    const jitter = noise3D(tSec * 0.8, 0, 0) * 0.012 * this.threshold
-    const thr = this.threshold + jitter
-    const above = rms > thr
+    const jitter = noise3D(tSec * 0.8, 0, 0) * 0.006 * this.threshold
+    const thrHigh = this.threshold + jitter
+    const thrLow = this.threshold * 0.82 + jitter * 0.65
+    const above = this.inExhale ? rms > thrLow : rms > thrHigh
 
     if (above && !this.inExhale) {
       const now = tSec
