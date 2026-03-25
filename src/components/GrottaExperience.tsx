@@ -1,63 +1,55 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { AudioAnalyzer } from '@/lib/AudioAnalyzer'
 import { BreathCycleDetector, summarizeBreaths } from '@/lib/breathAnalysis'
 import { getBreathMessage, type BreathInsight } from '@/lib/breathPatterns'
-import { BreathingSphere } from '@/components/BreathingSphere'
-import { FallbackOrb } from '@/components/FallbackOrb'
-import { WelcomeModal } from '@/components/WelcomeModal'
-import { ProgressArc } from '@/components/ProgressArc'
+import { easeOutExpoBezier } from '@/lib/easing'
+import { routes } from '@/lib/routes'
+import { VoiceRingCanvas } from '@/components/VoiceRingCanvas'
+import { SessionTimer } from '@/components/SessionTimer'
 import { BreathResult } from '@/components/BreathResult'
 
-const MODAL_FADE_MS = 600
-const SPHERE_DELAY_MS = 200
-const SPHERE_IN_MS = 1200
+const RING_DELAY_MS = 200
+const RING_IN_MS = 1200
 const NOISE_PRE_MS = 2000
 const SESSION_MS = 60_000
 const NOISE_RMS_THRESHOLD = 0.11
 const MIN_CYCLES = 5
-
-function easeOutCubic(t: number) {
-  return 1 - (1 - t) ** 3
-}
-
-function hasWebGL(): boolean {
-  try {
-    const c = document.createElement('canvas')
-    return !!(c.getContext('webgl2') || c.getContext('webgl'))
-  } catch {
-    return false
-  }
-}
+const SETTLE_MS = 2500
 
 type Phase =
-  | 'welcome'
   | 'entering'
   | 'await_mic'
   | 'noise_calib'
   | 'noise_warn'
   | 'session'
+  | 'settling'
   | 'result'
   | 'mic_denied'
   | 'breath_fail'
-  | 'skipped'
 
 export function GrottaExperience() {
-  const [phase, setPhase] = useState<Phase>('welcome')
-  const [modalOpen, setModalOpen] = useState(true)
-  const [modalExiting, setModalExiting] = useState(false)
+  const router = useRouter()
+  const [phase, setPhase] = useState<Phase>('entering')
   const [entrance, setEntrance] = useState(0)
   const [sessionProgress, setSessionProgress] = useState(0)
   const [insight, setInsight] = useState<BreathInsight | null>(null)
   const [resultVisible, setResultVisible] = useState(false)
-  const [webgl, setWebgl] = useState(true)
-  const [icosaDetail, setIcosaDetail] = useState(4)
-  const [bloom, setBloom] = useState(true)
+  const [staggerStep, setStaggerStep] = useState(0)
   const [dissolveV, setDissolveV] = useState(0)
   const [bgMigrated, setBgMigrated] = useState(false)
-  const [siteVisible, setSiteVisible] = useState(false)
   const [noiseCalibAvg, setNoiseCalibAvg] = useState<number | null>(null)
+  const [micOnSince, setMicOnSince] = useState<number | null>(null)
+  const [calmResult, setCalmResult] = useState(false)
+  const [settlingP, setSettlingP] = useState<number | null>(null)
+  const [timerFlash, setTimerFlash] = useState(false)
+  const [timerHide, setTimerHide] = useState(false)
+  const [instructionVisible, setInstructionVisible] = useState(false)
+  const [iniziaVisible, setIniziaVisible] = useState(false)
+  const [iniziaHiding, setIniziaHiding] = useState(false)
+  const [resultFadingOut, setResultFadingOut] = useState(false)
 
   const experienceT0 = useRef<number | null>(null)
   const analyzerRef = useRef<AudioAnalyzer | null>(null)
@@ -66,13 +58,6 @@ export function GrottaExperience() {
   const noiseSamplesRef = useRef<number[]>([])
   const rmsRef = useRef(0)
   const sessionDoneRef = useRef(false)
-
-  useEffect(() => {
-    setWebgl(hasWebGL())
-    if (typeof window !== 'undefined' && window.innerWidth < 520) {
-      setIcosaDetail(3)
-    }
-  }, [])
 
   useEffect(() => {
     let id = 0
@@ -85,17 +70,25 @@ export function GrottaExperience() {
   }, [])
 
   useEffect(() => {
-    if (phase !== 'entering') return
+    if (phase === 'noise_calib' && micOnSince == null) {
+      setMicOnSince(performance.now())
+    }
+  }, [phase, micOnSince])
+
+  useEffect(() => {
+    experienceT0.current = performance.now()
+    window.setTimeout(() => setInstructionVisible(true), 1000)
+    window.setTimeout(() => setIniziaVisible(true), 1400)
+
     const t0 = experienceT0.current
-    if (!t0) return
     let stop = false
     const tick = () => {
       if (stop) return
       const elapsed = performance.now() - t0
       let e = 0
-      if (elapsed < SPHERE_DELAY_MS) e = 0
-      else e = Math.min(1, (elapsed - SPHERE_DELAY_MS) / SPHERE_IN_MS)
-      setEntrance(easeOutCubic(e))
+      if (elapsed < RING_DELAY_MS) e = 0
+      else e = Math.min(1, (elapsed - RING_DELAY_MS) / RING_IN_MS)
+      setEntrance(easeOutExpoBezier(e))
       if (e < 1) requestAnimationFrame(tick)
       else setPhase('await_mic')
     }
@@ -103,26 +96,48 @@ export function GrottaExperience() {
     return () => {
       stop = true
     }
-  }, [phase])
+  }, [])
 
   const finishSession = useCallback(() => {
     if (sessionDoneRef.current) return
     sessionDoneRef.current = true
+    analyzerRef.current?.stop()
     const proc = detectorRef.current.getProcessedCycles()
     if (proc.length < MIN_CYCLES) {
       setPhase('breath_fail')
-      analyzerRef.current?.stop()
       return
     }
     const sum = summarizeBreaths(proc)
     if (!sum) {
       setPhase('breath_fail')
-      analyzerRef.current?.stop()
       return
     }
     setInsight(getBreathMessage(sum.rr, sum.ieRatio))
-    setPhase('result')
-    window.setTimeout(() => setResultVisible(true), 450)
+    setTimerFlash(true)
+    window.setTimeout(() => setTimerFlash(false), 200)
+    window.setTimeout(() => setTimerHide(true), 200)
+    setPhase('settling')
+    const settle0 = performance.now()
+    const settleTick = () => {
+      const u = (performance.now() - settle0) / SETTLE_MS
+      if (u < 1) {
+        setSettlingP(u)
+        requestAnimationFrame(settleTick)
+      } else {
+        setSettlingP(null)
+        setCalmResult(true)
+      }
+    }
+    requestAnimationFrame(settleTick)
+
+    window.setTimeout(() => setInstructionVisible(false), 1500)
+    window.setTimeout(() => {
+      setPhase('result')
+      setResultVisible(true)
+      setStaggerStep(1)
+    }, 2000)
+    window.setTimeout(() => setStaggerStep(2), 2200)
+    window.setTimeout(() => setStaggerStep(3), 2500)
   }, [])
 
   useEffect(() => {
@@ -131,6 +146,8 @@ export function GrottaExperience() {
       return
     }
     sessionT0.current = performance.now()
+    setTimerHide(false)
+    setTimerFlash(false)
     let stop = false
     const tick = () => {
       if (stop || !sessionT0.current) return
@@ -182,25 +199,14 @@ export function GrottaExperience() {
     }
   }, [phase, startSessionFromCalib])
 
-  const onWelcomeStart = () => {
-    setModalExiting(true)
-    window.setTimeout(() => {
-      setModalOpen(false)
-      experienceT0.current = performance.now()
-      setPhase('entering')
-    }, MODAL_FADE_MS)
-  }
-
-  const onSkipToSite = () => {
-    setModalOpen(false)
-    setPhase('skipped')
-  }
-
   const onMicStart = async () => {
+    setIniziaHiding(true)
+    window.setTimeout(() => setIniziaVisible(false), 400)
     const a = new AudioAnalyzer()
     analyzerRef.current = a
     const ok = await a.start()
     if (!ok) {
+      setIniziaHiding(false)
       setPhase('mic_denied')
       return
     }
@@ -212,106 +218,138 @@ export function GrottaExperience() {
   }
 
   const onDiscover = () => {
-    setResultVisible(false)
-    setBgMigrated(true)
-    setDissolveV((v) => v + 1)
+    setResultFadingOut(true)
+    window.setTimeout(() => {
+      setResultVisible(false)
+      setDissolveV((v) => v + 1)
+    }, 400)
+    window.setTimeout(() => setBgMigrated(true), 800)
+    window.setTimeout(() => {
+      router.push(`${routes.contenuto}?from=esperienza`)
+    }, 1500)
+  }
+
+  const onDissolveComplete = () => {}
+
+  const goToContenuto = () => {
     analyzerRef.current?.stop()
+    router.push(routes.contenuto)
   }
 
-  const onDissolveBurstEnd = () => {
-    window.setTimeout(() => setSiteVisible(true), 120)
-  }
+  const micOpen = phase === 'noise_calib' || phase === 'noise_warn' || phase === 'session'
+  const showTimer = phase === 'session'
+  const ringReveal = entrance
 
-  const onFpsLow = useCallback(() => {
-    setIcosaDetail((d) => Math.max(2, d - 1))
-    setBloom(false)
-  }, [])
+  const instructionText =
+    phase === 'await_mic'
+      ? 'Respira normalmente'
+      : phase === 'noise_calib'
+        ? 'Stiamo ascoltando il rumore di fondo…'
+        : phase === 'noise_warn'
+          ? 'Ambiente un po’ rumoroso'
+          : phase === 'session'
+            ? 'Respira normalmente per un minuto…'
+            : ''
 
-  const goToSite = () => {
-    analyzerRef.current?.stop()
-    setPhase('skipped')
-  }
+  const showInstructionBlock =
+    instructionVisible &&
+    phase !== 'result' &&
+    (phase === 'await_mic' ||
+      phase === 'noise_calib' ||
+      phase === 'noise_warn' ||
+      phase === 'session' ||
+      phase === 'settling')
 
-  const micReactive = phase === 'session'
-  const showProgress = phase === 'session'
-  const showInstruction =
-    phase === 'await_mic' ||
-    phase === 'noise_calib' ||
-    phase === 'noise_warn' ||
-    phase === 'session' ||
-    (phase === 'result' && !resultVisible)
+  const showAwaitMicCluster =
+    phase === 'await_mic' && (instructionVisible || iniziaVisible)
 
-  const resultWarm = phase === 'result'
-
-  let instructionText = ''
-  if (phase === 'await_mic') instructionText = 'Respira normalmente'
-  if (phase === 'noise_calib') instructionText = 'Stiamo ascoltando il rumore di fondo…'
-  if (phase === 'noise_warn') instructionText = 'Ambiente un po’ rumoroso'
-  if (phase === 'session') instructionText = 'Respira normalmente per un minuto…'
-  if (phase === 'result' && !resultVisible) instructionText = ''
-
-  const sphereEntrance =
-    phase === 'welcome' || (modalOpen && !modalExiting) ? 0 : phase === 'skipped' ? 1 : entrance
-
-  const showCanvas = phase !== 'skipped'
+  const showFloatingInstruction =
+    showInstructionBlock && instructionText && phase !== 'await_mic'
 
   return (
     <main
-      className={`relative min-h-dvh w-full overflow-hidden font-sans transition-colors duration-[2000ms] ${
+      className={`relative min-h-dvh w-full overflow-hidden font-sans transition-colors duration-[1200ms] ${
         bgMigrated ? 'bg-cave-dark' : 'bg-cave-black'
       }`}
     >
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse 80% 70% at 50% 38%, #1a1812 0%, #0a0a08 62%)',
+          background: 'radial-gradient(ellipse 80% 70% at 50% 42%, #1a1812 0%, #0a0a08 62%)',
         }}
       />
 
-      {showCanvas && (
-        <div className="absolute inset-0 z-0 min-h-dvh">
-          {webgl ? (
-            <BreathingSphere
-              rmsRef={rmsRef}
-              micReactive={micReactive}
-              detail={icosaDetail}
-              bloom={bloom}
-              entrance={sphereEntrance}
-              dissolveVersion={dissolveV}
-              resultWarm={resultWarm}
-              onFpsLow={onFpsLow}
-              onDissolveBurstEnd={onDissolveBurstEnd}
-            />
-          ) : (
-            <FallbackOrb />
+      <div className="absolute inset-0 z-0 min-h-dvh">
+        <VoiceRingCanvas
+          rmsRef={rmsRef}
+          ringEntrance={ringReveal}
+          micOnSince={micOnSince}
+          calmResult={calmResult}
+          micOpen={micOpen}
+          settlingProgress={settlingP}
+          dissolveKey={dissolveV}
+          onDissolveComplete={onDissolveComplete}
+        />
+      </div>
+
+      <SessionTimer progress={sessionProgress} visible={showTimer} flash={timerFlash} hide={timerHide} />
+
+      {showFloatingInstruction && (
+        <div
+          className={`pointer-events-none absolute left-1/2 top-[calc(42%+min(32vw,120px))] z-[2] w-[min(92vw,420px)] -translate-x-1/2 text-center font-display text-[clamp(1.5rem,3vw,2.25rem)] font-light leading-tight tracking-wide text-text-primary transition-opacity duration-[600ms] ease-out ${
+            showInstructionBlock ? 'opacity-90' : 'opacity-0'
+          }`}
+        >
+          <span>{instructionText}</span>
+        </div>
+      )}
+
+      {showAwaitMicCluster && (
+        <div
+          className="pointer-events-none absolute inset-0 z-[3] flex flex-col items-center justify-center px-6"
+          style={{ paddingBottom: 'max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem))' }}
+        >
+          <div
+            className={`flex w-full max-w-md flex-col items-center gap-5 text-center transition-opacity duration-[600ms] ease-out ${
+              instructionVisible ? 'opacity-90' : 'opacity-0'
+            }`}
+          >
+            {instructionVisible ? (
+              <>
+                <h2 className="font-display text-[clamp(1.5rem,3vw,2.25rem)] font-light leading-tight tracking-wide text-text-primary">
+                  Respira normalmente
+                </h2>
+                <p className="max-w-[28rem] font-sans text-sm leading-relaxed text-text-secondary">
+                  Ti chiederemo il microfono per un attimo di calibrazione del rumore di fondo. Poi l&apos;anello ti
+                  accompagnerà per circa un minuto: non serve forzare il ritmo, segui te stesso.
+                </p>
+              </>
+            ) : null}
+          </div>
+          {instructionVisible && (
+            <div className="pointer-events-auto mt-8 flex min-h-[48px] items-center justify-center">
+              {iniziaVisible ? (
+                <div
+                  className={`transition-all duration-500 ease-out ${
+                    iniziaHiding ? 'translate-y-2 opacity-0' : 'translate-y-0 opacity-100'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={onMicStart}
+                    className="rounded-full border border-salt-pink bg-transparent px-8 py-3 font-sans text-sm font-medium text-salt-pink transition-colors duration-300 hover:bg-salt-pink hover:text-cave-black"
+                  >
+                    Inizia
+                  </button>
+                </div>
+              ) : null}
+            </div>
           )}
         </div>
       )}
 
-      <div
-        className={`pointer-events-none absolute left-1/2 top-[calc(38%+min(36vw,140px))] z-[2] w-[min(92vw,420px)] -translate-x-1/2 text-center font-display text-[clamp(1.5rem,3vw,2.25rem)] font-light leading-tight tracking-wide text-text-primary transition-opacity duration-700 ${
-          showInstruction ? 'opacity-90' : 'opacity-0'
-        }`}
-      >
-        {showInstruction && instructionText ? <span>{instructionText}</span> : null}
-      </div>
-
-      <ProgressArc progress={sessionProgress} visible={showProgress} />
-
-      {phase === 'await_mic' && (
-        <div className="absolute bottom-[calc(22%+env(safe-area-inset-bottom))] left-1/2 z-[3] -translate-x-1/2">
-          <button
-            type="button"
-            onClick={onMicStart}
-            className="rounded-full border border-salt-pink bg-transparent px-8 py-3 font-sans text-sm font-medium text-salt-pink transition-colors duration-300 hover:bg-salt-pink hover:text-cave-black"
-          >
-            Inizia
-          </button>
-        </div>
-      )}
-
       {phase === 'noise_warn' && (
-        <div className="absolute bottom-[calc(18%+env(safe-area-inset-bottom))] left-1/2 z-[3] flex w-[min(92vw,360px)] -translate-x-1/2 flex-col gap-3 text-center">
+        <div className="absolute bottom-[calc(16%+env(safe-area-inset-bottom))] left-1/2 z-[3] flex w-[min(92vw,360px)] -translate-x-1/2 flex-col gap-3 text-center">
           <p className="font-sans text-sm text-text-secondary">
             Il rumore di fondo è alto (~{(noiseCalibAvg ?? 0).toFixed(2)} RMS). Per un risultato più affidabile prova in
             un luogo più silenzioso.
@@ -323,14 +361,25 @@ export function GrottaExperience() {
           >
             Continua comunque
           </button>
-          <button type="button" onClick={goToSite} className="font-sans text-xs text-text-muted underline-offset-2 hover:underline">
+          <button
+            type="button"
+            onClick={goToContenuto}
+            className="font-sans text-xs text-text-muted underline-offset-2 hover:underline"
+          >
             Vai al sito
           </button>
         </div>
       )}
 
       {insight && (
-        <BreathResult insight={insight} visible={resultVisible && phase === 'result'} onDiscover={onDiscover} />
+        <div className={resultFadingOut ? 'opacity-0 transition-opacity duration-[400ms]' : ''}>
+          <BreathResult
+            insight={insight}
+            visible={resultVisible && phase === 'result'}
+            staggerStep={staggerStep}
+            onDiscover={onDiscover}
+          />
+        </div>
       )}
 
       {phase === 'mic_denied' && (
@@ -340,7 +389,7 @@ export function GrottaExperience() {
           </p>
           <button
             type="button"
-            onClick={goToSite}
+            onClick={goToContenuto}
             className="rounded-full border border-salt-pink bg-transparent px-8 py-3 font-sans text-sm font-medium text-salt-pink hover:bg-salt-pink hover:text-cave-black"
           >
             Vai al sito
@@ -356,7 +405,7 @@ export function GrottaExperience() {
           </p>
           <button
             type="button"
-            onClick={goToSite}
+            onClick={goToContenuto}
             className="rounded-full border border-salt-pink bg-salt-pink px-8 py-3 font-sans text-sm font-medium text-cave-black hover:opacity-90"
           >
             Vai al sito
@@ -364,29 +413,9 @@ export function GrottaExperience() {
         </div>
       )}
 
-      {(phase === 'skipped' || siteVisible) && (
-        <section
-          id="sito-standard"
-          className={`relative z-10 flex min-h-dvh flex-col items-center justify-center bg-cave-dark px-6 text-center ${
-            siteVisible ? 'animate-site-up' : ''
-          }`}
-        >
-          <h2 className="max-w-lg font-display text-[clamp(1.5rem,4vw,2.25rem)] font-light leading-snug tracking-wide text-salt-warm">
-            45 minuti nella nostra grotta = 3 giorni di mare
-          </h2>
-          <p className="mt-4 max-w-md font-sans text-sm text-text-secondary">
-            Continua a seguirci — il sito completo è in arrivo
-          </p>
-        </section>
-      )}
-
       <p className="absolute bottom-[calc(10px+env(safe-area-inset-bottom))] left-1/2 z-[4] w-[min(92vw,520px)] -translate-x-1/2 px-3 text-center font-sans text-xs leading-snug text-text-muted">
         Questa analisi non è una diagnosi medica
       </p>
-
-      {modalOpen && (
-        <WelcomeModal open={modalOpen} exiting={modalExiting} onStart={onWelcomeStart} onSkipToSite={onSkipToSite} />
-      )}
     </main>
   )
 }
