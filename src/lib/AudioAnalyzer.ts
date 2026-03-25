@@ -1,18 +1,13 @@
-import { isByteTimeDomainStuckAtSilence, rmsFromByteTimeDomain } from './audioUtils'
+import { rmsFromByteTimeDomain } from './audioUtils'
 
 /** Più alto = risposta più rapida al microfono (UI + detector leggono questo valore). */
 const SMOOTH = 0.22
-
-const PIPELINE_CHECK_FRAMES = 16
-/** Soglia: solo se quasi tutti i frame sono “piatti” a 128 (pipeline non alimentata). */
-const PIPELINE_FAIL_THRESHOLD = 13
 
 export type AudioStartFailureReason =
   | 'permission_denied'
   | 'no_audio_track'
   | 'track_not_live'
   | 'audio_context_blocked'
-  | 'pipeline_silent'
 
 export type AudioStartResult = { ok: true } | { ok: false; reason: AudioStartFailureReason }
 
@@ -87,21 +82,6 @@ export class AudioAnalyzer {
     analyser.fftSize = 2048
     const data = new Uint8Array(analyser.fftSize)
     source.connect(analyser)
-
-    let stuckFrames = 0
-    for (let f = 0; f < PIPELINE_CHECK_FRAMES; f++) {
-      await nextFrame()
-      analyser.getByteTimeDomainData(data as Uint8Array<ArrayBuffer>)
-      if (isByteTimeDomainStuckAtSilence(data)) stuckFrames++
-    }
-
-    if (stuckFrames >= PIPELINE_FAIL_THRESHOLD) {
-      source.disconnect()
-      analyser.disconnect()
-      await ctx.close().catch(() => {})
-      releaseStream(stream)
-      return { ok: false, reason: 'pipeline_silent' }
-    }
 
     this.stream = stream
     this.ctx = ctx

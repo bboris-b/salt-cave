@@ -68,3 +68,42 @@ body {
 .animate-modal-in {
   animation: modal-in 500ms ease-out both;
 }
+
+/* Loader ingresso (solo prima sessione; componente client) */
+@keyframes salt-loader-draw {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0.52;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.48;
+  }
+}
+
+.salt-loader-path {
+  fill: none;
+  stroke: #d4967a;
+  stroke-width: 1.15;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: salt-loader-draw 2.4s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  filter: drop-shadow(0 0 10px rgba(212, 150, 122, 0.35));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .salt-loader-path {
+    stroke-dashoffset: 0;
+    animation: none;
+    opacity: 0.65;
+    filter: none;
+  }
+}

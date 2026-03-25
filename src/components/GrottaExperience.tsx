@@ -27,8 +27,6 @@ function micDeniedCopy(reason: AudioStartFailureReason | null): string {
       return 'La sorgente microfono non risulta attiva. Chiudi altre app che usano il microfono e riprova.'
     case 'audio_context_blocked':
       return 'L’audio della pagina non è partito (spesso serve un secondo tocco sullo schermo). Tocca di nuovo «Riprova» o ricarica la pagina.'
-    case 'pipeline_silent':
-      return 'Il microfono risulta autorizzato, ma non riceviamo variazioni dal segnale. Controlla che non sia mutato, che il browser usi il microfono giusto nelle impostazioni del sito, e prova con cuffie o auricolari.'
     case 'permission_denied':
     default:
       return 'Non abbiamo accesso al microfono. Puoi comunque scoprire la nostra grotta sul sito.'
