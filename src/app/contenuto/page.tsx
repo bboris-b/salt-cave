@@ -14,7 +14,9 @@ export default function ContenutoPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-dvh items-center justify-center bg-cave-dark font-sans text-text-muted">Caricamento…</div>
+        <div className="flex min-h-dvh items-center justify-center bg-transparent font-sans text-text-muted">
+          Caricamento…
+        </div>
       }
     >
       <ContenutoInner />

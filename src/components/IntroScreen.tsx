@@ -1,15 +1,21 @@
+'use client'
+
+import { useEffect } from 'react'
 import Link from 'next/link'
+import { useAtmosphereRefs } from '@/components/AtmosphereProvider'
+import { ATMOSPHERE_COLORS, DEFAULT_ATMOSPHERE_STATE } from '@/lib/atmosphereTypes'
 import { routes } from '@/lib/routes'
 
 export function IntroScreen() {
+  const atmo = useAtmosphereRefs()
+  useEffect(() => {
+    if (!atmo) return
+    atmo.bgTargetRef.current = ATMOSPHERE_COLORS.base
+    atmo.stateRef.current = { ...DEFAULT_ATMOSPHERE_STATE }
+  }, [atmo])
+
   return (
-    <main className="relative min-h-dvh w-full overflow-hidden bg-cave-black font-sans">
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: 'radial-gradient(ellipse 80% 70% at 50% 42%, #1a1812 0%, #0a0a08 62%)',
-        }}
-      />
+    <main className="relative min-h-dvh w-full overflow-hidden bg-transparent font-sans">
       <div className="relative z-10 flex min-h-dvh items-center justify-center p-6">
         <div
           className="animate-modal-in w-full max-w-[480px] rounded-[24px] px-10 py-10 shadow-2xl sm:px-12 sm:py-12"

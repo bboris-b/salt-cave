@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { AtmosphereRoot } from '@/components/AtmosphereRoot'
 import { SaltLoaderGate } from '@/components/SaltLoaderGate'
 import './globals.css'
 
@@ -27,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="it" className={`${cormorant.variable} ${dmSans.variable}`}>
       <body className="font-sans antialiased">
         <SaltLoaderGate />
-        {children}
+        <AtmosphereRoot>{children}</AtmosphereRoot>
       </body>
     </html>
   )

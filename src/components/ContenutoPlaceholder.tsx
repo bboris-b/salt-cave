@@ -1,4 +1,9 @@
+'use client'
+
+import { useEffect } from 'react'
 import Link from 'next/link'
+import { useAtmosphereRefs } from '@/components/AtmosphereProvider'
+import { ATMOSPHERE_COLORS, DEFAULT_ATMOSPHERE_STATE } from '@/lib/atmosphereTypes'
 import { routes } from '@/lib/routes'
 
 type Props = {
@@ -7,9 +12,16 @@ type Props = {
 }
 
 export function ContenutoPlaceholder({ animateIn }: Props) {
+  const atmo = useAtmosphereRefs()
+  useEffect(() => {
+    if (!atmo) return
+    atmo.bgTargetRef.current = ATMOSPHERE_COLORS.baseDissolve
+    atmo.stateRef.current = { ...DEFAULT_ATMOSPHERE_STATE }
+  }, [atmo])
+
   return (
     <main
-      className={`flex min-h-dvh flex-col items-center justify-center bg-cave-dark px-6 text-center font-sans ${
+      className={`flex min-h-dvh flex-col items-center justify-center bg-transparent px-6 text-center font-sans ${
         animateIn ? 'animate-site-up' : ''
       }`}
     >

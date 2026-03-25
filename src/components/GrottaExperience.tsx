@@ -10,13 +10,15 @@ import { routes } from '@/lib/routes'
 import { VoiceRingCanvas } from '@/components/VoiceRingCanvas'
 import { SessionTimer } from '@/components/SessionTimer'
 import { BreathResult } from '@/components/BreathResult'
+import { useAtmosphereRefs } from '@/components/AtmosphereProvider'
+import { ATMOSPHERE_COLORS, DEFAULT_ATMOSPHERE_STATE, type AtmospherePhase } from '@/lib/atmosphereTypes'
 
 const RING_DELAY_MS = 200
 const RING_IN_MS = 1200
 const NOISE_PRE_MS = 2000
 const SESSION_MS = 60_000
 const NOISE_RMS_THRESHOLD = 0.11
-const MIN_CYCLES = 4
+const MIN_CYCLES = 3
 const SETTLE_MS = 2500
 
 function micDeniedCopy(reason: AudioStartFailureReason | null): string {
@@ -72,7 +74,18 @@ export function GrottaExperience() {
   const sessionT0 = useRef<number | null>(null)
   const noiseSamplesRef = useRef<number[]>([])
   const rmsRef = useRef(0)
+  const breathEnvRef = useRef(0)
   const sessionDoneRef = useRef(false)
+  const phaseRef = useRef(phase)
+  phaseRef.current = phase
+  const bgMigratedRef = useRef(bgMigrated)
+  bgMigratedRef.current = bgMigrated
+  const dissolveVRef = useRef(dissolveV)
+  dissolveVRef.current = dissolveV
+  const settlingPRef = useRef(settlingP)
+  settlingPRef.current = settlingP
+
+  const atmo = useAtmosphereRefs()
 
   useEffect(() => {
     let id = 0
@@ -85,11 +98,42 @@ export function GrottaExperience() {
       } else {
         rmsRef.current = 0
       }
+
+      if (atmo) {
+        const rms = rmsRef.current
+        atmo.stateRef.current.breathAmplitude = Math.min(1, Math.pow(rms * 11, 0.62))
+        const ph = phaseRef.current
+        let ap: AtmospherePhase = 'idle'
+        if (bgMigratedRef.current || dissolveVRef.current > 0) {
+          ap = 'dissolving'
+          atmo.bgTargetRef.current = ATMOSPHERE_COLORS.baseDissolve
+        } else {
+          atmo.bgTargetRef.current = ATMOSPHERE_COLORS.base
+          if (ph === 'settling') {
+            ap = 'settling'
+            atmo.stateRef.current.settlingBlend = settlingPRef.current ?? 0
+          } else if (
+            ph === 'noise_calib' ||
+            ph === 'noise_warn' ||
+            ph === 'session' ||
+            ph === 'result'
+          ) {
+            ap = 'active'
+          }
+        }
+        atmo.stateRef.current.phase = ap
+      }
+
       id = requestAnimationFrame(loop)
     }
     id = requestAnimationFrame(loop)
-    return () => cancelAnimationFrame(id)
-  }, [])
+    return () => {
+      cancelAnimationFrame(id)
+      if (atmo) {
+        atmo.stateRef.current = { ...DEFAULT_ATMOSPHERE_STATE }
+      }
+    }
+  }, [atmo])
 
   useEffect(() => {
     if (phase === 'noise_calib' && micOnSince == null) {
@@ -168,6 +212,7 @@ export function GrottaExperience() {
       return
     }
     sessionT0.current = performance.now()
+    breathEnvRef.current = 0
     setTimerHide(false)
     setTimerFlash(false)
     let stop = false
@@ -178,8 +223,10 @@ export function GrottaExperience() {
       setSessionProgress(p)
       const tSec = elapsed / 1000
       const a = analyzerRef.current
-      const breathDrive = a ? Math.max(a.getSmoothedRMS(), a.getLastRawRMS() * 0.96) : 0
-      detectorRef.current.processSample(breathDrive, tSec)
+      const rawMix = a ? Math.max(a.getSmoothedRMS(), a.getLastRawRMS()) : 0
+      /* Inviluppo: attacco veloce sui picchi (respiro breve), rilascio lento — evita picchi persi nel lisciamento. */
+      breathEnvRef.current = Math.max(rawMix * 1.18, breathEnvRef.current * 0.84)
+      detectorRef.current.processSample(breathEnvRef.current, tSec)
       if (elapsed >= SESSION_MS) {
         finishSession()
         return
@@ -310,18 +357,7 @@ export function GrottaExperience() {
     showInstructionBlock && instructionText && phase !== 'await_mic'
 
   return (
-    <main
-      className={`relative min-h-dvh w-full overflow-hidden font-sans transition-colors duration-[1200ms] ${
-        bgMigrated ? 'bg-cave-dark' : 'bg-cave-black'
-      }`}
-    >
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: 'radial-gradient(ellipse 80% 70% at 50% 42%, #1a1812 0%, #0a0a08 62%)',
-        }}
-      />
-
+    <main className="relative min-h-dvh w-full overflow-hidden bg-transparent font-sans">
       <div className="absolute inset-0 z-0 min-h-dvh">
         <VoiceRingCanvas
           rmsRef={rmsRef}
