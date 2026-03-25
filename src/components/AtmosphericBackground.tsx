@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createWarmLights, drawWarmLight } from '@/lib/atmosphereLights'
 import type { WarmLight } from '@/lib/atmosphereLights'
 import { ATMOSPHERE_COLORS } from '@/lib/atmosphereTypes'
@@ -12,6 +12,8 @@ import { ParallaxController } from '@/lib/parallax'
 import type { AtmosphereContextValue } from './AtmosphereProvider'
 import { useAtmosphereRefs } from './AtmosphereProvider'
 import type { AtmosphereState } from '@/lib/atmosphereTypes'
+import { useSmoothScroll } from '@/providers/SmoothScrollContext'
+import { AtmosphereCssFallback } from '@/components/AtmosphereCssFallback'
 
 const MAX_DPR = 2
 const RESIZE_DEBOUNCE_MS = 100
@@ -39,6 +41,7 @@ function centralGlowOpacity(state: AtmosphereState): number {
 }
 
 export function AtmosphericBackground() {
+  const [canvasFailed, setCanvasFailed] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const apiRef = useRef<AtmosphereContextValue | null>(null)
   const lightsRef = useRef<WarmLight[]>([])
@@ -57,10 +60,13 @@ export function AtmosphericBackground() {
   const lastBgTargetRef = useRef('#0A0A08')
 
   const atmosphere = useAtmosphereRefs()
+  const smooth = useSmoothScroll()
+  const smoothRef = useRef(smooth)
+  smoothRef.current = smooth
   apiRef.current = atmosphere
 
   useEffect(() => {
-    if (!atmosphere) return
+    if (!atmosphere || canvasFailed) return
     lightsRef.current = createWarmLights()
     parallaxRef.current = new ParallaxController()
     const detach = parallaxRef.current.attachWindowListeners()
@@ -74,6 +80,7 @@ export function AtmosphericBackground() {
     const ctx = canvas.getContext('2d', { alpha: false })
     if (!ctx) {
       detach()
+      setCanvasFailed(true)
       return
     }
 
@@ -154,6 +161,12 @@ export function AtmosphericBackground() {
         return
       }
 
+      const sScroll = smoothRef.current
+      const reducedMotion = sScroll?.reducedMotion ?? false
+      const scrollProgress = sScroll?.progress ?? 0
+      const scrollParallaxScale = 0.3
+      const scrollOy = -scrollProgress * Math.min(h, w) * 0.12 * scrollParallaxScale
+
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.fillStyle = rgbToCss(displayRgbRef.current)
       ctx.fillRect(0, 0, w, h)
@@ -191,7 +204,11 @@ export function AtmosphericBackground() {
       ctx.fillStyle = gGlow
       ctx.fillRect(0, 0, w, h)
 
-      updateAndDrawSaltParticles(ctx, particlesRef.current, tSec, w, h, mox, moy)
+      updateAndDrawSaltParticles(ctx, particlesRef.current, tSec, w, h, mox, moy, {
+        scrollOx: 0,
+        scrollOy,
+        staticParticles: reducedMotion,
+      })
 
       const vx = w * 0.5
       const vy = h * 0.5
@@ -211,9 +228,10 @@ export function AtmosphericBackground() {
       if (debounce) clearTimeout(debounce)
       detach()
     }
-  }, [atmosphere])
+  }, [atmosphere, canvasFailed])
 
   if (!atmosphere) return null
+  if (canvasFailed) return <AtmosphereCssFallback />
 
   return (
     <canvas

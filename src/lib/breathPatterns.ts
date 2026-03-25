@@ -3,6 +3,15 @@ export type BreathInsight = {
   body: string
 }
 
+export type BreathPatternKey = 'accelerated' | 'slow' | 'short_exhale' | 'balanced'
+
+export function getBreathPatternKey(rr: number, ieRatio: number): BreathPatternKey {
+  if (rr > 18) return 'accelerated'
+  if (rr < 12) return 'slow'
+  if (rr >= 12 && rr <= 18 && ieRatio > 0.9) return 'short_exhale'
+  return 'balanced'
+}
+
 export function getBreathMessage(rr: number, ieRatio: number): BreathInsight {
   const rrLine = `Il tuo ritmo: ${rr.toFixed(1)} respiri al minuto`
 

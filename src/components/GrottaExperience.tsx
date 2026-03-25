@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AudioAnalyzer, type AudioStartFailureReason } from '@/lib/AudioAnalyzer'
 import { BreathCycleDetector, summarizeBreaths } from '@/lib/breathAnalysis'
-import { getBreathMessage, type BreathInsight } from '@/lib/breathPatterns'
+import { getBreathMessage, getBreathPatternKey, type BreathInsight } from '@/lib/breathPatterns'
 import { easeOutExpoBezier } from '@/lib/easing'
 import { routes } from '@/lib/routes'
 import { VoiceRingCanvas } from '@/components/VoiceRingCanvas'
@@ -12,6 +12,7 @@ import { SessionTimer } from '@/components/SessionTimer'
 import { BreathResult } from '@/components/BreathResult'
 import { useAtmosphereRefs } from '@/components/AtmosphereProvider'
 import { ATMOSPHERE_COLORS, DEFAULT_ATMOSPHERE_STATE, type AtmospherePhase } from '@/lib/atmosphereTypes'
+import { useBreathingData } from '@/providers/BreathingDataProvider'
 
 const RING_DELAY_MS = 200
 const RING_IN_MS = 1200
@@ -86,6 +87,8 @@ export function GrottaExperience() {
   settlingPRef.current = settlingP
 
   const atmo = useAtmosphereRefs()
+  const { setBreathingData, clearBreathingData } = useBreathingData()
+  const lastBreathRef = useRef<{ rr: number; ie: number } | null>(null)
 
   useEffect(() => {
     let id = 0
@@ -178,6 +181,7 @@ export function GrottaExperience() {
       setPhase('breath_fail')
       return
     }
+    lastBreathRef.current = { rr: sum.rr, ie: sum.ieRatio }
     setInsight(getBreathMessage(sum.rr, sum.ieRatio))
     setTimerFlash(true)
     window.setTimeout(() => setTimerFlash(false), 200)
@@ -301,6 +305,17 @@ export function GrottaExperience() {
   }
 
   const onDiscover = () => {
+    const raw = lastBreathRef.current
+    const ins = insight
+    if (raw && ins) {
+      setBreathingData({
+        respiratoryRate: raw.rr,
+        inhaleExhaleRatio: raw.ie,
+        patternKey: getBreathPatternKey(raw.rr, raw.ie),
+        personalizedMessage: ins.body,
+        headline: ins.rrLine,
+      })
+    }
     setResultFadingOut(true)
     window.setTimeout(() => {
       setResultVisible(false)
@@ -315,6 +330,7 @@ export function GrottaExperience() {
   const onDissolveComplete = () => {}
 
   const goToContenuto = () => {
+    clearBreathingData()
     analyzerRef.current?.stop()
     router.push(routes.contenuto)
   }

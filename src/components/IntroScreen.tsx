@@ -6,7 +6,13 @@ import { useAtmosphereRefs } from '@/components/AtmosphereProvider'
 import { ATMOSPHERE_COLORS, DEFAULT_ATMOSPHERE_STATE } from '@/lib/atmosphereTypes'
 import { routes } from '@/lib/routes'
 
-export function IntroScreen() {
+type IntroScreenProps = {
+  /** Stesso schermo intro su `/`: il salto al sito può restare sulla pagina. */
+  variant?: 'default' | 'embedded'
+  onSkipToSite?: () => void
+}
+
+export function IntroScreen({ variant = 'default', onSkipToSite }: IntroScreenProps) {
   const atmo = useAtmosphereRefs()
   useEffect(() => {
     if (!atmo) return
@@ -40,12 +46,22 @@ export function IntroScreen() {
           >
             Inizia l&apos;esperienza
           </Link>
-          <Link
-            href={routes.contenuto}
-            className="mt-5 block w-full text-center font-sans text-sm font-normal text-text-muted underline-offset-4 transition-colors hover:text-text-secondary hover:underline"
-          >
-            Vai direttamente al sito →
-          </Link>
+          {variant === 'embedded' && onSkipToSite ? (
+            <button
+              type="button"
+              onClick={onSkipToSite}
+              className="mt-5 block w-full text-center font-sans text-sm font-normal text-text-muted underline-offset-4 transition-colors hover:text-text-secondary hover:underline"
+            >
+              Vai direttamente al sito →
+            </button>
+          ) : (
+            <Link
+              href={routes.contenuto}
+              className="mt-5 block w-full text-center font-sans text-sm font-normal text-text-muted underline-offset-4 transition-colors hover:text-text-secondary hover:underline"
+            >
+              Vai direttamente al sito →
+            </Link>
+          )}
         </div>
       </div>
     </main>

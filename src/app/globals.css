@@ -5,9 +5,22 @@
 :root {
   --cave-black: #0a0a08;
   --cave-dark: #1a1812;
+  --cave-charcoal: #2c2a24;
+  --salt-pink: #d4967a;
+  --salt-amber: #c8874f;
+  --salt-warm: #e8c4a0;
+  --salt-glow: #f0d4b8;
+  --text-primary: #e8e0d4;
+  --text-secondary: #9c9486;
+  --text-muted: #6b645a;
+  --accent-cta: #d4967a;
+  --accent-cta-hover: #e0a88f;
+  --success: #7a9e7e;
+  --warning: #c9a227;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-quad: cubic-bezier(0.4, 0, 1, 1);
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-power2-out: cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
 html,
@@ -69,41 +82,126 @@ body {
   animation: modal-in 500ms ease-out both;
 }
 
-/* Loader ingresso (solo prima sessione; componente client) */
-@keyframes salt-loader-draw {
-  0% {
-    stroke-dashoffset: 100;
-    opacity: 0.52;
-  }
-  15% {
-    opacity: 1;
-  }
-  85% {
-    stroke-dashoffset: 0;
-    opacity: 1;
-  }
+/* Navbar: underline hover (salt-pink), ~300ms power2.out */
+.nav-link {
+  position: relative;
+  display: inline-block;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: var(--salt-pink);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.3s var(--ease-power2-out);
+}
+
+.nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* Classe su <html> da SmoothScrollProvider quando l’utente chiede meno movimento */
+html.salt-cave-reduced-motion .nav-link::after {
+  transition: none;
+}
+
+html.salt-cave-reduced-motion .animate-site-up,
+html.salt-cave-reduced-motion .animate-modal-in,
+html.salt-cave-reduced-motion .animate-result-in {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+}
+
+/* Hero Stanza 2 — hint scroll */
+@keyframes hero-scroll-hint-bounce {
+  0%,
   100% {
-    stroke-dashoffset: 0;
-    opacity: 0.48;
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
   }
 }
 
-.salt-loader-path {
-  fill: none;
-  stroke: #d4967a;
-  stroke-width: 1.15;
-  stroke-linecap: round;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  animation: salt-loader-draw 2.4s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-  filter: drop-shadow(0 0 10px rgba(212, 150, 122, 0.35));
+.hero-scroll-hint {
+  animation: hero-scroll-hint-bounce 2s ease-in-out infinite;
+  opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .salt-loader-path {
-    stroke-dashoffset: 0;
+  .hero-scroll-hint {
     animation: none;
-    opacity: 0.65;
-    filter: none;
   }
+}
+
+html.salt-cave-reduced-motion .hero-scroll-hint {
+  animation: none;
+}
+
+/* Prenotazione — ingresso mese calendario */
+@keyframes booking-cal-enter-right {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes booking-cal-enter-left {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.booking-cal-month-in-right {
+  animation: booking-cal-enter-right 0.4s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+.booking-cal-month-in-left {
+  animation: booking-cal-enter-left 0.4s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+/* WhatsApp CTA — pulse quando il form è completo */
+@keyframes booking-wa-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.booking-wa-pulse {
+  animation: booking-wa-pulse 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .booking-cal-month-in-right,
+  .booking-cal-month-in-left {
+    animation: none;
+  }
+
+  .booking-wa-pulse {
+    animation: none;
+  }
+}
+
+html.salt-cave-reduced-motion .booking-cal-month-in-right,
+html.salt-cave-reduced-motion .booking-cal-month-in-left,
+html.salt-cave-reduced-motion .booking-wa-pulse {
+  animation: none;
 }

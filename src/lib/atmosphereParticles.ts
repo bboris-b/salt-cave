@@ -33,6 +33,14 @@ export function createSaltParticles(count: number, width: number, height: number
   return particles
 }
 
+type ParticleDrawOpts = {
+  /** Offset aggiuntivo da scroll (parallax) */
+  scrollOx?: number
+  scrollOy?: number
+  /** prefers-reduced-motion: ferma drift particelle */
+  staticParticles?: boolean
+}
+
 export function updateAndDrawSaltParticles(
   ctx: CanvasRenderingContext2D,
   particles: SaltParticle[],
@@ -41,22 +49,28 @@ export function updateAndDrawSaltParticles(
   height: number,
   ox: number,
   oy: number,
+  opts?: ParticleDrawOpts,
 ): void {
   const r = parseInt(ATMOSPHERE_COLORS.saltPink.slice(1, 3), 16)
   const g = parseInt(ATMOSPHERE_COLORS.saltPink.slice(3, 5), 16)
   const b = parseInt(ATMOSPHERE_COLORS.saltPink.slice(5, 7), 16)
-  const parallaxX = ox * 24
-  const parallaxY = oy * 16
+  const scrollOx = opts?.scrollOx ?? 0
+  const scrollOy = opts?.scrollOy ?? 0
+  const staticParticles = opts?.staticParticles ?? false
+  const parallaxX = ox * 24 + scrollOx
+  const parallaxY = oy * 16 + scrollOy
 
   for (const p of particles) {
-    p.x += p.vx + Math.sin(tSec * p.wobbleSpeed + p.wobble) * 0.04
-    p.y += p.vy
-    if (p.y < -8) {
-      p.y = height + 8
-      p.x = Math.random() * width
+    if (!staticParticles) {
+      p.x += p.vx + Math.sin(tSec * p.wobbleSpeed + p.wobble) * 0.04
+      p.y += p.vy
+      if (p.y < -8) {
+        p.y = height + 8
+        p.x = Math.random() * width
+      }
+      if (p.x < -10) p.x = width + 10
+      if (p.x > width + 10) p.x = -10
     }
-    if (p.x < -10) p.x = width + 10
-    if (p.x > width + 10) p.x = -10
 
     const drawX = p.x + parallaxX
     const drawY = p.y + parallaxY
