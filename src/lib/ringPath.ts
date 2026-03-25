@@ -5,27 +5,27 @@ export type RingPoint = { x: number; y: number }
 type Noise3 = (x: number, y: number, z: number) => number
 
 /**
- * Displacement idle: noise3D(cos(a)*1.5, sin(a)*1.5, t*0.15) * amp
+ * Displacement idle: noise3D(cos(a)*1.5, sin(a)*1.5, t*0.135) * amp
  */
 export function idleDisplacement(noise3D: Noise3, angle: number, tSec: number, amp: number): number {
   const c = Math.cos(angle) * 1.5
   const s = Math.sin(angle) * 1.5
-  return noise3D(c, s, tSec * 0.1) * amp
+  return noise3D(c, s, tSec * 0.135) * amp
 }
 
 /**
- * Ondulazione morbida lungo l’anello — poche armoniche basse, tempo da “respiro lento”.
- * `drive` modula leggermente ampiezza e velocità senza introdurre frequenze nervose.
+ * Via di mezzo: curva viva ma non “increspata”; 4 armoniche, tempo tra zen e reattivo.
  */
 export function breathWaveshape(angle: number, tSec: number, drive = 1): number {
   const d = Math.max(0, Math.min(1, drive))
-  const speed = 0.42 + d * 0.35
-  const amp = 0.72 + d * 0.22
+  const speed = 0.52 + d * 0.44
+  const amp = 0.8 + d * 0.22
   const sum =
-    Math.sin(angle * 3 - tSec * 0.52 * speed) * 0.58 * amp +
-    Math.sin(angle * 5 - tSec * 0.36 * speed) * 0.28 * amp +
-    Math.sin(angle * 2 + tSec * 0.22 * speed) * 0.14 * amp
-  return sum * 0.92
+    Math.sin(angle * 3 - tSec * 0.74 * speed) * 0.5 * amp +
+    Math.sin(angle * 5 - tSec * 0.52 * speed) * 0.26 * amp +
+    Math.sin(angle * 2 + tSec * 0.34 * speed) * 0.14 * amp +
+    Math.sin(angle * 7 - tSec * 0.6 * speed) * 0.12 * amp
+  return sum * 0.9
 }
 
 /** Costruisce path chiuso con quadraticCurveTo; controllo = punto polare a θ medio */
