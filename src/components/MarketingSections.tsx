@@ -1,6 +1,7 @@
 'use client'
 
 import { BreathingInsightCard } from '@/components/BreathingInsightCard'
+import { ExperienceStoryBlock } from '@/components/ExperienceStoryBlock'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
 import { PillTag } from '@/components/ui/PillTag'
 import { BeneficiPinnedSection } from '@/components/BeneficiPinnedSection'
@@ -10,6 +11,7 @@ import { CommercialStatsStrip } from '@/components/CommercialStatsStrip'
 // import { TestimonialSection } from '@/components/TestimonialSection'
 import { PrezziPacchettiSection } from '@/components/PrezziPacchettiSection'
 import { PrenotazioneSection } from '@/components/PrenotazioneSection'
+import { ACCOGLIENZA_LEAD_MERGED } from '@/lib/heroExperienceCopy'
 import { SITE_GRID_GAP, SITE_GRID_WRAP } from '@/lib/page-layout'
 import { useBreathingData } from '@/providers/BreathingDataProvider'
 
@@ -28,15 +30,14 @@ export function MarketingSections({ animateIn }: Props) {
       <ScienceHero />
 
       <section id="accoglienza" className="scroll-mt-24 border-b border-cave-charcoal/40">
-        <div className={`${SITE_GRID_WRAP} py-16 md:py-20 lg:py-24`}>
-          <div className={`grid grid-cols-1 lg:grid-cols-12 ${SITE_GRID_GAP}`}>
+        <div className={`${SITE_GRID_WRAP} pb-12 md:pb-16 lg:pb-20`}>
+          <div className={`grid grid-cols-1 lg:grid-cols-12 ${SITE_GRID_GAP} pt-10 md:pt-14 lg:pt-16`}>
             <div className={data ? 'lg:col-span-8' : 'lg:col-span-12'}>
               <ScrollReveal>
                 <PillTag>L&apos;esperienza</PillTag>
               </ScrollReveal>
-              <p className="mt-6 max-w-2xl text-base font-normal leading-[1.7] text-text-secondary md:text-lg md:leading-relaxed">
-                Ogni seduta è tempo solo per te. Qui sotto trovi come la grotta sostiene benessere e respiro — senza
-                sostituire il parere del medico.
+              <p className="mt-5 max-w-2xl text-base font-normal leading-[1.7] text-text-secondary md:mt-6 md:text-lg md:leading-relaxed">
+                {ACCOGLIENZA_LEAD_MERGED}
               </p>
             </div>
             {data ? (
@@ -45,6 +46,7 @@ export function MarketingSections({ animateIn }: Props) {
               </div>
             ) : null}
           </div>
+          <ExperienceStoryBlock />
         </div>
       </section>
 

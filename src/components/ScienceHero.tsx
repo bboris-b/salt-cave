@@ -10,13 +10,6 @@ const TITLE = 'Il tuo respiro merita uno spazio diverso.'
 const SUBTITLE =
   'La prima grotta di sale terapeutica nel cuore di Roma. 45 minuti che cambiano il modo in cui respiri.'
 
-const NARRATIVE = `Immagina 45 minuti di silenzio. L'aria è tiepida, sa di mare. Sei sdraiato su una chaise longue, avvolto da pareti di sale rosa dell'Himalaya. Sopra di te, un soffitto di cristalli. Un nebulizzatore diffonde microparticelle di sale nell'aria — così piccole che le respiri senza accorgertene. Il tuo corpo fa il resto.`
-
-const DATA_LINE = "In una seduta respiri l'equivalente di 3 giorni di aria di mare."
-
-const HALO_LINE =
-  'È la stessa logica dell’aria di mare, concentrata in una stanza. La cosa più vicina al mare che puoi trovare a Roma.'
-
 const WORD_STAGGER = 0.1
 const WORD_DURATION = 0.8
 
@@ -33,9 +26,6 @@ export function ScienceHero() {
   const visualClipRef = useRef<HTMLDivElement>(null)
   const visualParallaxRef = useRef<HTMLDivElement>(null)
   const overlayRef = useRef<HTMLParagraphElement>(null)
-  const narrativeRef = useRef<HTMLParagraphElement>(null)
-  const dataRef = useRef<HTMLParagraphElement>(null)
-  const haloRef = useRef<HTMLParagraphElement>(null)
 
   useLayoutEffect(() => {
     initGsapPlugins()
@@ -47,34 +37,24 @@ export function ScienceHero() {
     const clipEl = visualClipRef.current
     const parallaxEl = visualParallaxRef.current
     const overlayEl = overlayRef.current
-    const narrativeEl = narrativeRef.current
-    const dataEl = dataRef.current
-    const haloEl = haloRef.current
 
-    if (!section || !titleEl || !subtitleEl || !ctaEl || !microEl || !narrativeEl || !dataEl || !haloEl) return
+    if (!section || !titleEl || !subtitleEl || !ctaEl || !microEl) return
 
     let splitTitle: SplitType | null = null
-    let splitNarrative: SplitType | null = null
 
     const ctx = gsap.context(() => {
       if (reduced) {
-        gsap.set(
-          [subtitleEl, ctaEl, microEl, overlayEl, narrativeEl, dataEl, haloEl, clipEl, parallaxEl].filter(Boolean),
-          { clearProps: 'all' },
-        )
-        gsap.set([subtitleEl, ctaEl, microEl, overlayEl, narrativeEl, dataEl, haloEl], { autoAlpha: 1 })
+        gsap.set([subtitleEl, ctaEl, microEl, overlayEl, clipEl, parallaxEl].filter(Boolean), { clearProps: 'all' })
+        gsap.set([subtitleEl, ctaEl, microEl, overlayEl].filter(Boolean), { autoAlpha: 1 })
         gsap.set(ctaEl, { y: 0 })
         if (clipEl) gsap.set(clipEl, { clipPath: 'inset(0% 0% 0% 0%)' })
         if (parallaxEl) gsap.set(parallaxEl, { yPercent: 0 })
         return
       }
 
-      gsap.set([subtitleEl, ctaEl, microEl, overlayEl], { autoAlpha: 0 })
+      gsap.set([subtitleEl, ctaEl, microEl, overlayEl].filter(Boolean), { autoAlpha: 0 })
       gsap.set(ctaEl, { y: 20 })
-      gsap.set([narrativeEl, dataEl, haloEl], { autoAlpha: 0 })
-      gsap.set(dataEl, { x: -20 })
 
-      /** Allineato al proxy Lenis su <html>; senza questo clip-path/scrub restano “morti”. */
       const scroller = getScrollTriggerScroller()
 
       splitTitle = new SplitType(titleEl, { types: 'words', tagName: 'span' })
@@ -87,7 +67,6 @@ export function ScienceHero() {
       const titleEnd =
         words && words.length > 0 ? (words.length - 1) * WORD_STAGGER + WORD_DURATION : WORD_DURATION
 
-      /* Nessuno ScrollTrigger: titolo, sottotitolo e CTA devono animare nel primo viewport */
       const entrance = gsap.timeline({ delay: 0.1 })
 
       if (words?.length) {
@@ -134,11 +113,6 @@ export function ScienceHero() {
           scrub: true,
         } as const
 
-        /**
-         * Desktop: clip-path reveal + parallax pieno.
-         * Mobile: fade (meno reflow) + parallasse quasi nullo (motion).
-         * matchMedia aggiorna se ridimensioni la finestra.
-         */
         ScrollTrigger.matchMedia({
           '(max-width: 767px)': function mobileVisual() {
             gsap.set(clipEl, { clipPath: 'inset(0% 0% 0% 0%)' })
@@ -186,50 +160,17 @@ export function ScienceHero() {
           },
         })
       }
-
-      splitNarrative = new SplitType(narrativeEl, { types: 'lines', tagName: 'span' })
-      const lines = splitNarrative.lines
-      if (lines?.length) {
-        gsap.from(lines, {
-          y: 40,
-          autoAlpha: 0,
-          duration: 0.85,
-          stagger: 0.08,
-          ease: 'power4.out',
-          scrollTrigger: {
-            scroller,
-            trigger: narrativeEl,
-            start: 'top 78%',
-            once: true,
-          },
-        })
-      } else {
-        gsap.set(narrativeEl, { autoAlpha: 1 })
-      }
-
-      const tailTl = gsap.timeline({
-        scrollTrigger: {
-          scroller,
-          trigger: dataEl,
-          start: 'top 82%',
-          once: true,
-        },
-      })
-      tailTl.fromTo(dataEl, { autoAlpha: 0, x: -20 }, { autoAlpha: 1, x: 0, duration: 0.8, ease: 'power3.out' })
-      tailTl.fromTo(haloEl, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.65, ease: 'power2.out' }, '-=0.35')
     }, section)
 
     return () => {
       ctx.revert()
-      splitNarrative?.revert()
       splitTitle?.revert()
     }
   }, [reduced])
 
   return (
     <section ref={sectionRef} id="esperienza" className="scroll-mt-24" aria-labelledby="science-hero-title">
-      {/* VIEWPORT 1 — ponte emotivo + posizionamento */}
-      <div className="mx-auto max-w-[800px] px-5 pb-14 pt-[12vh] md:pb-20 md:pt-[20vh]">
+      <div className="mx-auto max-w-[800px] px-5 pb-10 pt-[12vh] md:pb-14 md:pt-[18vh]">
         <div className="hero-title-var-wrap">
           <h1 id="science-hero-title" ref={titleRef} className="animate-weight type-hero-ingresso">
             {TITLE}
@@ -252,11 +193,10 @@ export function ScienceHero() {
         </p>
       </div>
 
-      {/* VIEWPORT 2 — visual full-bleed (100vw); foto: sostituire il layer placeholder in .hero-visual-media */}
-      <div className="hero-full-bleed my-16 md:my-28">
+      <div className="hero-full-bleed my-8 md:my-14">
         <div
           ref={visualClipRef}
-          className="hero-visual relative w-full overflow-hidden bg-cave-black min-h-[40vh] aspect-[4/3] md:aspect-auto md:min-h-[min(78vh,920px)]"
+          className="hero-visual relative w-full overflow-hidden bg-cave-black min-h-[40vh] aspect-[4/3] md:aspect-auto md:min-h-[min(72vh,880px)]"
         >
           <div
             ref={visualParallaxRef}
@@ -275,27 +215,6 @@ export function ScienceHero() {
             Entra. Respira. Lascia fuori il resto.
           </p>
         </div>
-      </div>
-
-      {/* VIEWPORT 3 — narrativa sensoriale */}
-      <div className="mx-auto max-w-[800px] px-5 pb-20 md:pb-28">
-        <p
-          ref={narrativeRef}
-          className="science-hero-narrative max-w-[640px] font-sans font-normal leading-[1.8] text-[var(--text-primary)] [font-size:clamp(1rem,1.1vw,1.125rem)]"
-        >
-          {NARRATIVE}
-        </p>
-
-        <p
-          ref={dataRef}
-          className="type-hero-data mt-12 max-w-[640px] border-l-2 border-salt-pink pl-5 md:pl-[20px]"
-        >
-          {DATA_LINE}
-        </p>
-
-        <p ref={haloRef} className="mt-6 max-w-[640px] font-sans text-base font-normal leading-relaxed text-[var(--text-secondary)]">
-          {HALO_LINE}
-        </p>
       </div>
     </section>
   )
