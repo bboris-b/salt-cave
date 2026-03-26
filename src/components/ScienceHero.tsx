@@ -14,7 +14,8 @@ const NARRATIVE = `Immagina 45 minuti di silenzio. L'aria è tiepida, sa di mare
 
 const DATA_LINE = "In una seduta respiri l'equivalente di 3 giorni di aria di mare."
 
-const HALO_LINE = 'Si chiama haloterapia. Ed è la cosa più vicina al mare che puoi trovare a Roma.'
+const HALO_LINE =
+  'È la stessa logica dell’aria di mare, concentrata in una stanza. La cosa più vicina al mare che puoi trovare a Roma.'
 
 const WORD_STAGGER = 0.1
 const WORD_DURATION = 0.8

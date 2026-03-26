@@ -14,6 +14,7 @@ import { gsap, initGsapPlugins } from '@/lib/gsap-init'
 import { Button } from '@/components/ui/Button'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { setBookingPackageLabel } from '@/lib/bookingPackage'
+import { SITE_GRID_WRAP } from '@/lib/page-layout'
 
 const bookingLinkBase =
   'cta-focus-visible flex w-full items-center justify-center text-center font-sans text-sm font-medium transition-colors duration-300'
@@ -314,7 +315,7 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
 
   return (
     <section id="prezzi" className="scroll-mt-24 border-t border-cave-charcoal/40" aria-labelledby="prezzi-heading">
-      <div className="mx-auto max-w-[1100px] px-5 py-20 lg:px-8 lg:py-24">
+      <div className={`${SITE_GRID_WRAP} py-20 lg:py-24`}>
         {/* Intro */}
         <header className="mx-auto max-w-2xl text-center">
           {personalized ? (

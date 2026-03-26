@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef } from 'react'
 import { gsap, getScrollTriggerScroller, initGsapPlugins } from '@/lib/gsap-init'
+import { SITE_GRID_WRAP } from '@/lib/page-layout'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 const valueClass =
@@ -75,7 +76,7 @@ export function CommercialStatsStrip() {
       className="border-t border-cave-charcoal/40 bg-transparent"
       aria-label="In sintesi"
     >
-      <div className="mx-auto max-w-5xl px-5 py-16 md:py-20 lg:px-8">
+      <div className={`${SITE_GRID_WRAP} py-16 md:py-20`}>
         <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-8 lg:gap-10">
           <div ref={col1Ref} className="text-center md:text-left">
             <p className={valueClass}>Una seduta, quanto una pausa pranzo</p>

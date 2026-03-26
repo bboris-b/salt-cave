@@ -14,6 +14,7 @@ import { gsap, getScrollTriggerScroller, initGsapPlugins } from '@/lib/gsap-init
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { getBookingPackageLabel } from '@/lib/bookingPackage'
 import { getTimeSlotsForDate, type TimeSlot } from '@/lib/staticAvailability'
+import { SITE_GRID_WRAP } from '@/lib/page-layout'
 import { buildBookingWhatsAppUrl } from '@/lib/whatsappBooking'
 
 const TITLE = 'Ti aspettiamo'
@@ -462,7 +463,7 @@ export function PrenotazioneSection() {
       className="scroll-mt-24 border-t border-cave-charcoal/40"
       aria-labelledby="prenotazione-main-heading"
     >
-      <div className="mx-auto max-w-[1100px] px-5 py-20 lg:px-8 lg:py-24">
+      <div className={`${SITE_GRID_WRAP} py-20 lg:py-24`}>
         <header className="mx-auto max-w-2xl text-center">
           <h2
             id="prenotazione-main-heading"

@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, type ReactNode } from 'react'
 import { gsap, getScrollTriggerScroller, initGsapPlugins } from '@/lib/gsap-init'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { useSmoothScroll } from '@/providers/SmoothScrollContext'
+import { SITE_GRID_GAP, SITE_GRID_WRAP } from '@/lib/page-layout'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
 
 function CheckIcon({ className = '' }: { className?: string }) {
@@ -161,7 +162,7 @@ export function BeneficiPinnedSection() {
       className="scroll-mt-24 border-t border-cave-charcoal/40"
       aria-labelledby="benefici-heading"
     >
-      <div className="mx-auto max-w-3xl px-5 pb-8 pt-16 lg:px-8 lg:pb-10 lg:pt-20">
+      <div className={`${SITE_GRID_WRAP} pb-8 pt-16 lg:pb-10 lg:pt-20`}>
         <h2 id="benefici-heading" className="animate-weight-section type-display-section text-salt-warm">
           Benefici
         </h2>
@@ -170,31 +171,39 @@ export function BeneficiPinnedSection() {
       <div ref={pinHostRef} className="relative lg:min-h-0">
         <div
           ref={pinPanelRef}
-          className="flex min-h-[min(100dvh,760px)] items-center justify-center px-5 py-12 lg:min-h-screen lg:px-8"
+          className="flex min-h-[min(100dvh,760px)] items-center justify-center py-12 lg:min-h-screen"
         >
-          <div className="relative mx-auto w-full max-w-xl">
-            {STEPS.map((step, i) => (
-              <div
-                key={step.title}
-                ref={setStepRef(i)}
-                className={`mb-10 last:mb-0 lg:mb-0 lg:absolute lg:inset-0 lg:flex lg:items-center lg:justify-center ${i > 0 ? 'lg:opacity-0' : ''}`}
-              >
-                <div className="w-full max-w-xl border border-cave-charcoal/60 bg-cave-dark/40 p-8 backdrop-blur-sm md:p-10 lg:border-cave-charcoal/50">
-                  <h3 className="font-display text-[clamp(1.35rem,3vw,1.85rem)] font-medium leading-tight text-[var(--salt-warm)] [font-variation-settings:'wght'_500,'opsz'_48,'WONK'_0,'SOFT'_0]">
-                    {step.title}
-                  </h3>
-                  <p className="mt-5 font-sans text-base font-normal leading-relaxed text-[var(--text-primary)]">
-                    {step.body}
-                  </p>
-                  <div className="mt-6 space-y-3 border-t border-cave-charcoal/40 pt-6">{step.hooks}</div>
+          <div className={`${SITE_GRID_WRAP} relative w-full`}>
+            <div className="relative min-h-[280px] w-full lg:min-h-[320px]">
+              {STEPS.map((step, i) => (
+                <div
+                  key={step.title}
+                  ref={setStepRef(i)}
+                  className="mb-10 last:mb-0 lg:mb-0 lg:absolute lg:inset-0 lg:flex lg:items-center"
+                >
+                  <div className="w-full border border-cave-charcoal/60 bg-cave-dark/40 p-6 backdrop-blur-sm md:p-8 lg:border-cave-charcoal/50 lg:p-10">
+                    <div className={`grid grid-cols-1 lg:grid-cols-12 ${SITE_GRID_GAP}`}>
+                      <div className="lg:col-span-8">
+                        <h3 className="font-display text-[clamp(1.35rem,3vw,1.85rem)] font-medium leading-tight text-[var(--salt-warm)] [font-variation-settings:'wght'_500,'opsz'_48,'WONK'_0,'SOFT'_0]">
+                          {step.title}
+                        </h3>
+                        <p className="mt-5 font-sans text-base font-normal leading-relaxed text-[var(--text-primary)]">
+                          {step.body}
+                        </p>
+                      </div>
+                      <div className="mt-8 border-t border-cave-charcoal/40 pt-6 lg:col-span-4 lg:mt-0 lg:border-l lg:border-t-0 lg:border-cave-charcoal/40 lg:pl-8 lg:pt-0">
+                        <div className="space-y-3">{step.hooks}</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-3xl px-5 pb-20 pt-6 lg:px-8 lg:pb-24 lg:pt-10">
+      <div className={`${SITE_GRID_WRAP} pb-20 pt-6 lg:pb-24 lg:pt-10`}>
         <ScrollReveal className="flex flex-col items-center text-center" distance={24} duration={700} stagger={100}>
           <p className="font-display text-xl font-normal text-[var(--salt-warm)] [font-variation-settings:'wght'_400,'opsz'_40,'WONK'_0,'SOFT'_0]">
             Hai trovato il tuo motivo?
