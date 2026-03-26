@@ -444,7 +444,7 @@ export function GrottaExperience() {
                   <button
                     type="button"
                     onClick={onMicStart}
-                    className="rounded-full border border-salt-pink bg-transparent px-8 py-3 font-sans text-sm font-medium text-salt-pink transition-colors duration-300 hover:bg-salt-pink hover:text-cave-black"
+                    className="cta-focus-visible rounded-full border border-salt-pink bg-transparent px-8 py-3 font-sans text-sm font-medium text-salt-pink transition-colors duration-300 hover:bg-salt-pink hover:text-cave-black"
                   >
                     Inizia
                   </button>
@@ -465,7 +465,7 @@ export function GrottaExperience() {
           <button
             type="button"
             onClick={onNoiseContinue}
-            className="rounded-full border border-salt-pink bg-transparent px-6 py-2.5 font-sans text-sm font-medium text-salt-pink hover:bg-salt-pink hover:text-cave-black"
+            className="cta-focus-visible rounded-full border border-salt-pink bg-transparent px-6 py-2.5 font-sans text-sm font-medium text-salt-pink hover:bg-salt-pink hover:text-cave-black"
           >
             Continua comunque
           </button>
@@ -497,14 +497,14 @@ export function GrottaExperience() {
             <button
               type="button"
               onClick={retryMic}
-              className="rounded-full border border-salt-pink bg-salt-pink px-8 py-3 font-sans text-sm font-medium text-cave-black hover:opacity-90"
+              className="cta-focus-visible rounded-full border border-salt-pink bg-salt-pink px-8 py-3 font-sans text-sm font-medium text-cave-black hover:opacity-90"
             >
               Riprova
             </button>
             <button
               type="button"
               onClick={goToContenuto}
-              className="rounded-full border border-salt-pink bg-transparent px-8 py-3 font-sans text-sm font-medium text-salt-pink hover:bg-salt-pink hover:text-cave-black"
+              className="cta-focus-visible rounded-full border border-salt-pink bg-transparent px-8 py-3 font-sans text-sm font-medium text-salt-pink hover:bg-salt-pink hover:text-cave-black"
             >
               Vai al sito
             </button>
@@ -522,7 +522,7 @@ export function GrottaExperience() {
           <button
             type="button"
             onClick={goToContenuto}
-            className="rounded-full border border-salt-pink bg-salt-pink px-8 py-3 font-sans text-sm font-medium text-cave-black hover:opacity-90"
+            className="cta-focus-visible rounded-full border border-salt-pink bg-salt-pink px-8 py-3 font-sans text-sm font-medium text-cave-black hover:opacity-90"
           >
             Vai al sito
           </button>

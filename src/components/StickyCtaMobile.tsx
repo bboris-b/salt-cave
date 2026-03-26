@@ -54,7 +54,7 @@ export function StickyCtaMobile() {
       <p className="min-w-0 flex-1 font-sans text-sm font-normal text-text-primary">Prenota la tua seduta</p>
       <a
         href="#prenotazione"
-        className="shrink-0 rounded-[100px] bg-[var(--accent-cta)] px-5 py-2 font-sans text-xs font-medium text-cave-black outline-none transition-colors duration-300 hover:bg-[var(--accent-cta-hover)] focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-dark"
+        className="cta-focus-visible shrink-0 rounded-[100px] bg-[var(--accent-cta)] px-5 py-2 font-sans text-xs font-medium text-cave-black transition-colors duration-300 hover:bg-[var(--accent-cta-hover)]"
       >
         Prenota
       </a>

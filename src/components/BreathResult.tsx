@@ -43,7 +43,7 @@ export function BreathResult({ insight, visible, staggerStep, onDiscover }: Prop
           <button
             type="button"
             onClick={onDiscover}
-            className="mt-8 rounded-full bg-salt-pink px-8 py-3 font-sans text-sm font-medium text-cave-black transition-opacity hover:opacity-90"
+            className="cta-focus-visible mt-8 rounded-full bg-salt-pink px-8 py-3 font-sans text-sm font-medium text-cave-black transition-opacity hover:opacity-90"
           >
             Scopri la nostra grotta
           </button>

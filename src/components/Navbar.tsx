@@ -5,16 +5,18 @@ import Link from 'next/link'
 import { gsap, initGsapPlugins } from '@/lib/gsap-init'
 import { useSmoothScroll } from '@/providers/SmoothScrollContext'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
-import { Button } from '@/components/ui/Button'
 
 const LINKS = [
   { href: '#esperienza', label: "L'esperienza" },
   { href: '#benefici', label: 'Benefici' },
-  { href: '#testimonianze', label: 'Chi ci ha scelto' },
   { href: '#prezzi', label: 'Prezzi' },
-  { href: '#prenotazione', label: 'Prenota' },
-  { href: '#chi-siamo', label: 'Chi siamo' },
 ] as const
+
+const ctaClass =
+  'cta-focus-visible inline-flex items-center justify-center rounded-[100px] bg-[var(--accent-cta)] px-7 py-2.5 font-sans text-sm font-medium text-cave-black transition-colors duration-300 hover:bg-[var(--accent-cta-hover)]'
+
+const ctaMobileClass =
+  'cta-focus-visible flex w-full max-w-sm items-center justify-center rounded-[100px] bg-[var(--accent-cta)] py-4 text-center font-sans text-base font-medium text-cave-black transition-colors duration-300 hover:bg-[var(--accent-cta-hover)]'
 
 export function Navbar() {
   const smooth = useSmoothScroll()
@@ -120,11 +122,8 @@ export function Navbar() {
       className="fixed left-0 right-0 top-0 z-[100] transition-[background-color,border-color,backdrop-filter] duration-[400ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]"
       style={barStyle}
     >
-      <div className="mx-auto flex h-[4.25rem] max-w-6xl items-center justify-between gap-4 px-5 lg:px-8">
-        <Link
-          href="/"
-          className="type-label-uppercase shrink-0 text-salt-warm md:text-[0.8125rem]"
-        >
+      <div className="mx-auto flex h-[4.25rem] max-w-6xl items-center justify-between gap-4 px-5 lg:gap-8 lg:px-8">
+        <Link href="/" className="type-nav-logo shrink-0 text-salt-warm">
           Grotta di Sale
         </Link>
 
@@ -141,9 +140,9 @@ export function Navbar() {
         </nav>
 
         <div className="hidden shrink-0 lg:block">
-          <Button type="button" variant="solid" className="!px-7 !py-2.5 !text-sm">
+          <a href="#prenotazione" className={ctaClass}>
             Prenota ora
-          </Button>
+          </a>
         </div>
 
         <button
@@ -163,28 +162,36 @@ export function Navbar() {
       <div
         id="mobile-menu"
         ref={menuPanel}
-        className="fixed inset-0 top-0 z-[105] flex flex-col items-center justify-center bg-[var(--cave-black)] px-8 lg:hidden"
+        className="fixed inset-0 top-0 z-[105] flex flex-col bg-[var(--cave-black)] lg:hidden"
         style={{ opacity: 0, visibility: 'hidden', pointerEvents: 'none' }}
         aria-hidden={!open}
       >
-        <nav className="flex flex-col items-center gap-8" aria-label="Mobile">
-          {LINKS.map((item, i) => (
-            <a
-              key={item.href}
-              ref={(el) => {
-                itemsRef.current[i] = el
-              }}
-              href={item.href}
-              className="font-sans text-lg font-normal text-text-primary"
-              onClick={() => setOpen(false)}
-            >
-              {item.label}
-            </a>
-          ))}
-          <Button type="button" variant="solid" className="mt-4 !px-10" onClick={() => setOpen(false)}>
+        <div className="flex flex-1 flex-col justify-center px-8 pb-6 pt-[4.5rem]">
+          <nav className="flex flex-col items-center gap-10" aria-label="Mobile">
+            {LINKS.map((item, i) => (
+              <a
+                key={item.href}
+                ref={(el) => {
+                  itemsRef.current[i] = el
+                }}
+                href={item.href}
+                className="font-sans text-lg font-normal text-text-primary"
+                onClick={() => setOpen(false)}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+        <div className="shrink-0 border-t border-cave-charcoal/50 px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6">
+          <a
+            href="#prenotazione"
+            className={ctaMobileClass}
+            onClick={() => setOpen(false)}
+          >
             Prenota ora
-          </Button>
-        </nav>
+          </a>
+        </div>
       </div>
     </header>
   )

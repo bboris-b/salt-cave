@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { href: '#benefici', label: 'Benefici' },
   { href: '#prezzi', label: 'Prezzi' },
   { href: '#prenotazione', label: 'Prenota' },
+  { href: '#chi-siamo', label: 'Chi siamo' },
 ] as const
 
 function IconInstagram({ className }: { className?: string }) {
@@ -168,7 +169,11 @@ export function SiteFooter() {
                 <li key={item.href}>
                   <a
                     href={item.href}
-                    className="font-sans text-sm font-normal text-text-secondary transition-colors duration-200 hover:text-salt-pink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-dark"
+                    className={
+                      item.href === '#prenotazione'
+                        ? 'cta-focus-visible font-sans text-sm font-normal text-text-secondary transition-colors duration-200 hover:text-salt-pink'
+                        : 'font-sans text-sm font-normal text-text-secondary transition-colors duration-200 hover:text-salt-pink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-dark'
+                    }
                   >
                     {item.label}
                   </a>

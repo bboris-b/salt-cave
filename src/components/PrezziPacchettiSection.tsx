@@ -16,7 +16,7 @@ import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { setBookingPackageLabel } from '@/lib/bookingPackage'
 
 const bookingLinkBase =
-  'flex w-full items-center justify-center text-center font-sans text-sm font-medium outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-dark'
+  'cta-focus-visible flex w-full items-center justify-center text-center font-sans text-sm font-medium transition-colors duration-300'
 const bookingOutline = `${bookingLinkBase} rounded-[100px] border border-[var(--salt-pink)] bg-transparent px-6 py-3 text-[var(--salt-pink)] hover:bg-[var(--salt-pink)] hover:text-cave-black`
 const bookingSolid = `${bookingLinkBase} rounded-[100px] bg-[var(--accent-cta)] px-6 py-3 text-cave-black hover:bg-[var(--accent-cta-hover)]`
 const bookingAmber = `${bookingLinkBase} rounded-[100px] border border-salt-amber bg-transparent px-6 py-3 text-salt-amber hover:bg-salt-amber/10`
@@ -224,8 +224,7 @@ function QuizOptionCard({ selected, onSelect, label, Icon, reduced }: QuizOption
         }
       }}
       className={[
-        'flex h-[120px] w-[120px] shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border border-cave-charcoal bg-cave-dark px-2 text-center outline-none transition-[transform,border-color,background-color,color] duration-200 [transition-timing-function:cubic-bezier(0.215,0.61,0.355,1)]',
-        'focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-black',
+        'cta-focus-visible flex h-[120px] w-[120px] shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border border-cave-charcoal bg-cave-dark px-2 text-center transition-[transform,border-color,background-color,color] duration-200 [transition-timing-function:cubic-bezier(0.215,0.61,0.355,1)]',
         selected
           ? `border-2 border-salt-pink bg-salt-pink/[0.08] text-salt-pink ${reduced ? '' : 'scale-105'}`
           : 'border text-text-secondary hover:border-salt-pink/40',
@@ -320,7 +319,7 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
         <header className="mx-auto max-w-2xl text-center">
           {personalized ? (
             <div className={`transition-opacity duration-[800ms] ease-out ${introReady ? 'opacity-100' : 'opacity-0'}`}>
-              <h2 id="prezzi-heading" className="type-display-section text-salt-warm">
+              <h2 id="prezzi-heading" className="animate-weight-section type-display-section text-salt-warm">
                 Il tuo respiro ci ha raccontato qualcosa
               </h2>
               <p
@@ -332,7 +331,7 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
             </div>
           ) : (
             <div className={introReady ? 'opacity-100' : 'opacity-0'} style={{ transition: 'opacity 800ms ease-out' }}>
-              <h2 id="prezzi-heading" className="type-display-section text-salt-warm">
+              <h2 id="prezzi-heading" className="animate-weight-section type-display-section text-salt-warm">
                 Trova il percorso giusto per te
               </h2>
               <p className="mt-4 font-sans text-sm font-normal leading-relaxed text-text-secondary md:text-[15px]">
@@ -374,7 +373,7 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
                         type="button"
                         variant="solid"
                         disabled={!who}
-                        className="!px-8 focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-black disabled:pointer-events-none disabled:opacity-40"
+                        className="!px-8 disabled:pointer-events-none disabled:opacity-40"
                         onClick={goQuiz2}
                       >
                         Continua
@@ -400,19 +399,14 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
                       ))}
                     </div>
                     <div className="mt-8 flex flex-wrap justify-center gap-3">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        className="focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-black"
-                        onClick={() => setPhase('quiz1')}
-                      >
+                      <Button type="button" variant="ghost" onClick={() => setPhase('quiz1')}>
                         Indietro
                       </Button>
                       <Button
                         type="button"
                         variant="solid"
                         disabled={!focus}
-                        className="!px-8 focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-black disabled:pointer-events-none disabled:opacity-40"
+                        className="!px-8 disabled:pointer-events-none disabled:opacity-40"
                         onClick={goPackages}
                       >
                         Vedi i pacchetti
@@ -528,7 +522,7 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
               </p>
               <a
                 href="#prenotazione"
-                className="mx-auto mt-6 flex w-8 justify-center text-text-muted outline-none focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-black rounded-full"
+                className="cta-focus-visible mx-auto mt-6 flex w-8 justify-center text-text-muted rounded-full"
                 aria-label="Vai alla prenotazione"
               >
                 <span className="hero-scroll-hint inline-block">

@@ -462,7 +462,7 @@ export function PrenotazioneSection() {
           <h2
             id="prenotazione-main-heading"
             ref={titleRef}
-            className="type-display-hero text-salt-warm"
+            className="animate-weight type-display-hero text-salt-warm"
           >
             {TITLE}
           </h2>
@@ -687,8 +687,7 @@ export function PrenotazioneSection() {
                             if (errors.time) setErrors((x) => ({ ...x, time: undefined }))
                           }}
                           className={[
-                            'booking-slot-pill rounded-full px-5 py-2 font-sans text-sm font-normal outline-none transition-[background-color,color,transform] duration-200',
-                            'focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-black',
+                            'booking-slot-pill cta-focus-visible rounded-full px-5 py-2 font-sans text-sm font-normal transition-[background-color,color,transform] duration-200',
                             !slot.available && 'cursor-not-allowed text-text-muted line-through opacity-60',
                             slot.available && !active && 'bg-cave-charcoal text-text-primary hover:bg-cave-charcoal/90',
                             active && 'bg-salt-pink text-cave-black',
@@ -717,7 +716,7 @@ export function PrenotazioneSection() {
                 type="button"
                 onClick={handleWhatsApp}
                 className={[
-                  'flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-6 py-4 font-sans text-sm font-medium text-white outline-none transition-[transform,filter] duration-200 hover:scale-[1.01] hover:brightness-90 focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-black',
+                  'cta-focus-visible flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-6 py-4 font-sans text-sm font-medium text-white transition-[transform,filter] duration-200 hover:scale-[1.01] hover:brightness-90',
                   formComplete && !reduced ? 'booking-wa-pulse' : '',
                 ].join(' ')}
               >

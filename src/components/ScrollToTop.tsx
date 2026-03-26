@@ -51,7 +51,7 @@ export function ScrollToTop() {
       type="button"
       onClick={onClick}
       aria-label="Torna in cima"
-      className="fixed bottom-8 right-6 z-[85] hidden h-12 w-12 items-center justify-center rounded-full border border-cave-charcoal bg-cave-dark/80 text-text-muted shadow-lg backdrop-blur-sm transition-[background-color,color,transform] duration-200 hover:scale-[1.03] hover:bg-salt-pink hover:text-cave-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-black lg:flex"
+      className="cta-focus-visible fixed bottom-8 right-6 z-[85] hidden h-12 w-12 items-center justify-center rounded-full border border-cave-charcoal bg-cave-dark/80 text-text-muted shadow-lg backdrop-blur-sm transition-[background-color,color,transform] duration-200 hover:scale-[1.03] hover:bg-salt-pink hover:text-cave-black lg:flex"
     >
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
         <path d="M12 19V5M5 12l7-7 7 7" strokeLinecap="round" strokeLinejoin="round" />

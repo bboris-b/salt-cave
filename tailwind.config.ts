@@ -27,7 +27,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ['var(--font-display)', 'ui-serif', 'Georgia', 'serif'],
+        display: ['var(--font-display)', 'Fraunces', 'ui-serif', 'Georgia', 'serif'],
         sans: ['var(--font-dm-sans)', 'system-ui', 'sans-serif'],
       },
     },

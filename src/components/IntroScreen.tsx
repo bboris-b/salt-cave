@@ -42,7 +42,7 @@ export function IntroScreen({ variant = 'default', onSkipToSite }: IntroScreenPr
           </p>
           <Link
             href={routes.esperienza}
-            className="mt-8 flex w-full items-center justify-center rounded-full bg-salt-pink py-3 text-center font-sans text-sm font-medium text-cave-black transition-opacity hover:opacity-90"
+            className="cta-focus-visible mt-8 flex w-full items-center justify-center rounded-full bg-salt-pink py-3 text-center font-sans text-sm font-medium text-cave-black transition-opacity hover:opacity-90"
           >
             Inizia l&apos;esperienza
           </Link>

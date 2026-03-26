@@ -1,10 +1,12 @@
 'use client'
 
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
-import { SplitText } from '@/components/ui/SplitText'
 import { PillTag } from '@/components/ui/PillTag'
+import { BeneficiPinnedSection } from '@/components/BeneficiPinnedSection'
 import { ScienceHero } from '@/components/ScienceHero'
-import { TestimonialSection } from '@/components/TestimonialSection'
+import { CommercialStatsStrip } from '@/components/CommercialStatsStrip'
+// Testimonial: nascosto finché il negozio non ha recensioni reali — riattivare import + JSX sotto
+// import { TestimonialSection } from '@/components/TestimonialSection'
 import { PrezziPacchettiSection } from '@/components/PrezziPacchettiSection'
 import { PrenotazioneSection } from '@/components/PrenotazioneSection'
 import { useBreathingData } from '@/providers/BreathingDataProvider'
@@ -34,38 +36,26 @@ export function MarketingSections({ animateIn }: Props) {
         </section>
       ) : null}
 
-      <section id="accoglienza" className="mx-auto max-w-3xl scroll-mt-24 px-5 py-24 lg:px-8">
+      <section id="accoglienza" className="mx-auto max-w-3xl scroll-mt-24 px-5 py-20 lg:px-8 lg:py-24">
         <ScrollReveal>
           <PillTag>L&apos;esperienza</PillTag>
         </ScrollReveal>
-        <div className="mt-6">
-          <h2 className="type-display-section text-text-primary">
-            <SplitText type="words" as="span" className="inline" animate={{ stagger: 0.05, y: 10 }}>
-              Un tempo per te, tra luci calde e sale micronizzato.
-            </SplitText>
-          </h2>
-        </div>
-        <ScrollReveal className="mt-5" delay={120}>
-          <p className="max-w-xl text-sm leading-relaxed text-text-secondary">
-            Respira in un ambiente studiato per favorire relax e benessere delle vie respiratorie. Il percorso introduttivo
-            che hai scelto ci aiuta a proporti un messaggio più vicino al tuo ritmo.
-          </p>
-        </ScrollReveal>
+        <p className="mt-6 max-w-xl text-sm leading-relaxed text-text-secondary">
+          Ogni seduta è tempo solo per te. Qui sotto trovi come la grotta sostiene benessere e respiro — senza sostituire il
+          parere del medico.
+        </p>
       </section>
 
-      <section id="benefici" className="mx-auto max-w-3xl scroll-mt-24 border-t border-cave-charcoal/40 px-5 py-24 lg:px-8">
-        <ScrollReveal>
-          <h2 className="type-display-section text-salt-warm">Benefici</h2>
-        </ScrollReveal>
-        <ScrollReveal className="mt-4">
-          <p className="text-sm leading-relaxed text-text-secondary">
-            Haloterapia, microclima controllato, supporto al benessere respiratorio e stress quotidiano — senza sostituire
-            il parere medico.
-          </p>
-        </ScrollReveal>
-      </section>
+      <BeneficiPinnedSection />
 
-      <TestimonialSection />
+      {/*
+        ═══ TESTIMONIALS (sezione nascosta: negozio nuovo) ═══
+        Per ripristinare: decommentare l’import di TestimonialSection in cima al file e la riga qui sotto.
+
+        <TestimonialSection />
+      */}
+
+      <CommercialStatsStrip />
 
       <PrezziPacchettiSection breathingPersonalizedMessage={data?.personalizedMessage ?? null} />
 
@@ -73,7 +63,7 @@ export function MarketingSections({ animateIn }: Props) {
 
       <section id="chi-siamo" className="mx-auto max-w-3xl scroll-mt-24 border-t border-cave-charcoal/40 px-5 py-24 lg:px-8">
         <ScrollReveal>
-          <h2 className="type-display-section text-salt-warm">Chi siamo</h2>
+          <h2 className="animate-weight-section type-display-section text-salt-warm">Chi siamo</h2>
         </ScrollReveal>
         <ScrollReveal className="mt-4">
           <p className="text-sm text-text-secondary">La nostra grotta di sale — identità e storia del centro.</p>

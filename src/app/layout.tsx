@@ -10,6 +10,10 @@ import './globals.css'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
+/**
+ * Latin only (no latin-ext): subset più leggero del variable font.
+ * `preload: true` fa sì che Next inietti nel documento `<link rel="preload" as="font" type="font/woff2" crossorigin>`.
+ */
 const fraunces = Fraunces({
   subsets: ['latin'],
   weight: 'variable',
@@ -25,7 +29,8 @@ const dmSans = DM_Sans({
   weight: ['400', '500'],
   variable: '--font-dm-sans',
   display: 'swap',
-  preload: true,
+  /** Evita doppio preload critico: priorità al display (Fraunces). */
+  preload: false,
 })
 
 export const metadata: Metadata = {

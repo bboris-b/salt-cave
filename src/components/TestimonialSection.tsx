@@ -299,7 +299,7 @@ export function TestimonialSection() {
         <h2
           id="testimonial-title"
           ref={titleRef}
-          className="type-display-section max-w-[20ch] text-salt-warm md:max-w-none"
+          className="animate-weight-section type-display-section max-w-[20ch] text-salt-warm md:max-w-none"
         >
           {TITLE}
         </h2>
@@ -383,7 +383,7 @@ export function TestimonialSection() {
         <Link
           ref={ctaRef}
           href="#prezzi"
-          className="mt-8 inline-flex rounded-full bg-accent-cta px-8 py-4 font-sans text-sm font-medium text-cave-black outline-none transition-[transform,background-color] duration-300 [transition-timing-function:cubic-bezier(0.215,0.61,0.355,1)] hover:scale-[1.02] hover:bg-accent-cta-hover focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-black"
+          className="cta-focus-visible mt-8 inline-flex rounded-full bg-accent-cta px-8 py-4 font-sans text-sm font-medium text-cave-black transition-[transform,background-color] duration-300 [transition-timing-function:cubic-bezier(0.215,0.61,0.355,1)] hover:scale-[1.02] hover:bg-accent-cta-hover"
         >
           Scopri il percorso giusto per te
         </Link>
