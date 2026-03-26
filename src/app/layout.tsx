@@ -36,7 +36,7 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${SITE_NAME} | Haloterapia`,
+    default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
   },
   description: BUSINESS.description,
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     locale: 'it_IT',
     url: '/',
     siteName: SITE_NAME,
-    title: `${SITE_NAME} | Haloterapia`,
+    title: SITE_NAME,
     description: BUSINESS.description,
     images: [
       {
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_NAME} | Haloterapia`,
+    title: SITE_NAME,
     description: BUSINESS.description,
   },
 }

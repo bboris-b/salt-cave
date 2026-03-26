@@ -4,7 +4,13 @@ import type { MutableRefObject } from 'react'
 import { useEffect, useRef } from 'react'
 import { createNoise3D } from 'simplex-noise'
 import { easeOutExpoBezier, mapRange } from '@/lib/easing'
-import { RING_POINT_COUNT, breathWaveshape, buildRingPath, idleDisplacement } from '@/lib/ringPath'
+import {
+  RING_POINT_COUNT,
+  breathWaveshape,
+  buildRingPath,
+  idleDisplacement,
+  travelingRipple,
+} from '@/lib/ringPath'
 
 const COL_PINK = '#D4967A'
 const COL_GLOW = '#F0D4B8'
@@ -61,6 +67,8 @@ export function VoiceRingCanvas({
   const noiseBrown = useRef(createNoise3D(() => 0.47))
   const sizeRef = useRef({ w: 0, h: 0, dpr: 1, cx: 0, cy: 0, rBase: 120 })
   const smoothedRmsRef = useRef(0)
+  /** RMS più smussato solo per la geometria dell'anello (meno “trema” sul volume). */
+  const smoothedRmsGeomRef = useRef(0)
   const glowDisplayRef = useRef(0.06)
   const glowSlowRef = useRef(0.06)
   const lastDissolveKey = useRef(0)
@@ -206,8 +214,11 @@ export function VoiceRingCanvas({
       const tSec = now / 1000
       const raw = rmsRef.current
       const sr = smoothedRmsRef.current
-      const chase = mic && !calm ? 0.58 : rm ? 0.32 : 0.42
-      smoothedRmsRef.current = sr + (raw - sr) * chase
+      const srg = smoothedRmsGeomRef.current
+      const chaseFast = mic && !calm ? 0.52 : rm ? 0.32 : 0.42
+      const chaseGeom = mic && !calm ? 0.14 : rm ? 0.18 : 0.24
+      smoothedRmsRef.current = sr + (raw - sr) * chaseFast
+      smoothedRmsGeomRef.current = srg + (raw - srg) * chaseGeom
 
       const inSettling = sp != null
       const settling = sp ?? 0
@@ -215,11 +226,11 @@ export function VoiceRingCanvas({
       const idleAmp = inSettling ? 3.3 + (1.65 - 3.3) * easeOutExpoBezier(Math.min(1, settling)) : 3.3
       const effectiveBreathBlend = bb * breathMult
 
-      const rms = smoothedRmsRef.current
-      const visualLevel = visualLevelFromRms(rms)
+      const visualLevel = visualLevelFromRms(smoothedRmsRef.current)
+      const visualLevelGeom = visualLevelFromRms(smoothedRmsGeomRef.current)
       const micReactive = mic && bb > 0.008 && breathMult > 0.05
       const idleDamp =
-        micReactive && visualLevel > 0.022 ? Math.max(0.55, 1 - visualLevel * 0.4) : 1
+        micReactive && visualLevelGeom > 0.022 ? Math.max(0.42, 1 - visualLevelGeom * 0.55) : 1
       const idleAmpEff = idleAmp * idleDamp
 
       const organicDrive =
@@ -228,23 +239,34 @@ export function VoiceRingCanvas({
             ? 0.36 + 0.42 * easeOutExpoBezier(Math.min(1, settling * 1.08))
             : 0.5 + 0.14 * Math.sin(tSec * 0.58) * Math.sin(tSec * 0.29)
           : 0
-      const micDrive = effectiveBreathBlend * visualLevel
-      const drive = Math.min(1, micDrive * 1.12 + organicDrive)
-      const waveAmp = mapRange(drive, 0, 1, 15, 48)
-      const angleShim = drive * 0.1 * Math.sin(tSec * 1.55)
+      /** Volume per forma d’onda: lento così l’increspatura non saltella frame-to-frame. */
+      const micDriveGeom = effectiveBreathBlend * visualLevelGeom
+      const driveWave = Math.min(1, micDriveGeom * 1.12 + organicDrive)
+      /** Risposta veloce al volume per glow/spessore (la forma usa driveWave + visualLevelGeom). */
+      const driveVisual = Math.min(1, effectiveBreathBlend * visualLevel * 1.12 + organicDrive)
+      const waveAmp = mapRange(driveWave, 0, 1, 15, 48)
+      const rippleStrength = micReactive ? mapRange(visualLevelGeom, 0, 1, 0.12, 1.05) : driveWave * 0.45
+      const angleShim = micReactive
+        ? driveWave * 0.045 * Math.sin(tSec * 0.65)
+        : driveWave * 0.1 * Math.sin(tSec * 1.55)
 
       let coherentAmp = 0
       let coherentHz = 1.35
       if (micReactive) {
-        coherentAmp = visualLevel * 17
-        coherentHz = 2.02
+        /** Nessun termine uniforme su tutti i punti: è quello che sembrava “traballare”. */
+        coherentAmp = 0
+        coherentHz = 1.35
       } else if (ambOrg || inSettling) {
         coherentAmp = 6.8 + 2.4 * Math.sin(tSec * 0.38)
         coherentHz = 1.22
       }
       const coherentPulse = coherentAmp * Math.sin(tSec * coherentHz)
 
-      const wave = (angle: number) => waveAmp * breathWaveshape(angle + angleShim, tSec, drive)
+      const wave = (angle: number) => {
+        const breath = breathWaveshape(angle + angleShim, tSec, driveWave)
+        const rip = travelingRipple(angle, tSec, rippleStrength, driveWave)
+        return waveAmp * (micReactive ? 0.42 * breath + 0.58 * rip : 0.72 * breath + 0.28 * rip)
+      }
 
       const n3 = noise3D.current
       for (let i = 0; i < RING_POINT_COUNT; i++) {
@@ -262,7 +284,7 @@ export function VoiceRingCanvas({
       let glowTarget = activeReactive
         ? micReactive
           ? 0.085 + visualLevel * 0.38
-          : 0.076 + drive * 0.24
+          : 0.076 + driveVisual * 0.24
         : 0.06
       if (inSettling) {
         glowTarget = 0.04 + (glowTarget - 0.04) * (1 - Math.min(1, settling * (2 / 2.5)))
@@ -274,22 +296,22 @@ export function VoiceRingCanvas({
 
       const strokeMain = inSettling
         ? 1.5 + (1.0 - 1.5) * easeOutExpoBezier(Math.min(1, settling * (2 / 2.5)))
-        : 1.28 + visualLevel * 2.45 + (ambientAlive && !micReactive ? drive * 1.2 : 0)
+        : 1.28 + visualLevel * 2.45 + (ambientAlive && !micReactive ? driveVisual * 1.2 : 0)
       const mainOpacityIdle =
-        0.75 + (mic ? visualLevel * 0.24 : 0) + (ambientAlive ? drive * 0.11 : 0)
+        0.75 + (mic ? visualLevel * 0.24 : 0) + (ambientAlive ? driveVisual * 0.11 : 0)
       const mainOpacity = Math.min(
         0.96,
         inSettling
           ? mainOpacityIdle * (1 - settling * 0.12)
           : mainOpacityIdle +
               (micReactive ? visualLevel * 0.13 : 0) +
-              (ambientAlive && !micReactive ? drive * 0.06 : 0),
+              (ambientAlive && !micReactive ? driveVisual * 0.06 : 0),
       )
 
       const echoOp = activeReactive
         ? micReactive
           ? 0.072 + visualLevel * 0.11
-          : 0.078 + drive * 0.1
+          : 0.078 + driveVisual * 0.1
         : 0.072
       const scale = 0.7 + 0.3 * easeOutExpoBezier(ent)
       const fadeIn = ent * 0.75

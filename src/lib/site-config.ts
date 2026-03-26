@@ -11,7 +11,7 @@ export function getSiteUrl(): string {
 export const BUSINESS = {
   name: SITE_NAME,
   description:
-    'Haloterapia e benessere respiratorio nella grotta di sale nel cuore di Roma. Prenota la tua seduta.',
+    'Benessere respiratorio nella grotta di sale terapeutica nel cuore di Roma. Prenota la tua seduta.',
   telephone: '+39 06 0000 0000',
   email: 'info@grottadisale.it',
   streetAddress: 'Via Esempio 123',

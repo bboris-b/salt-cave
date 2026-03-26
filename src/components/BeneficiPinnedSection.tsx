@@ -1,7 +1,7 @@
 'use client'
 
 import { useLayoutEffect, useRef, type ReactNode } from 'react'
-import { gsap, initGsapPlugins } from '@/lib/gsap-init'
+import { gsap, getScrollTriggerScroller, initGsapPlugins } from '@/lib/gsap-init'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { useSmoothScroll } from '@/providers/SmoothScrollContext'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
@@ -96,6 +96,7 @@ export function BeneficiPinnedSection() {
     if (!section || !host || !panel || steps.length !== 3) return
 
     const mm = gsap.matchMedia()
+    const scroller = getScrollTriggerScroller()
 
     const setupDesktopPin = () => {
       const s1 = steps[0]
@@ -108,6 +109,7 @@ export function BeneficiPinnedSection() {
 
       const tl = gsap.timeline({
         scrollTrigger: {
+          scroller,
           trigger: host,
           start: 'top top',
           end: () => `+=${endDist()}`,

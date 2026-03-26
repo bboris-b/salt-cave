@@ -10,4 +10,12 @@ export function initGsapPlugins(): void {
   registered = true
 }
 
+/**
+ * Con Lenis, `SmoothScrollProvider` applica `scrollerProxy` su `document.documentElement`:
+ * ogni ScrollTrigger deve usare questo `scroller` o resta agganciato allo scroll nativo (effetti “morti”).
+ */
+export function getScrollTriggerScroller(): HTMLElement {
+  return document.documentElement
+}
+
 export { gsap, ScrollTrigger, ScrollToPlugin }

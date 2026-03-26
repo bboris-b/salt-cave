@@ -1,7 +1,7 @@
 'use client'
 
 import { useLayoutEffect } from 'react'
-import { gsap, initGsapPlugins } from '@/lib/gsap-init'
+import { gsap, getScrollTriggerScroller, initGsapPlugins } from '@/lib/gsap-init'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 /**
@@ -15,6 +15,8 @@ export function AnimateWeightTitles() {
     if (reduced) return
 
     initGsapPlugins()
+
+    const scroller = getScrollTriggerScroller()
 
     const ctx = gsap.context(() => {
       const heroTitles = gsap.utils
@@ -34,6 +36,7 @@ export function AnimateWeightTitles() {
             fontVariationSettings: `"wght" 500, "opsz" ${opsz}, "WONK" 0, "SOFT" 0`,
             ease: 'none',
             scrollTrigger: {
+              scroller,
               trigger: el,
               start: 'top 80%',
               end: 'top 20%',

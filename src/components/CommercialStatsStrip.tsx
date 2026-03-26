@@ -1,7 +1,7 @@
 'use client'
 
 import { useLayoutEffect, useRef } from 'react'
-import { gsap, initGsapPlugins } from '@/lib/gsap-init'
+import { gsap, getScrollTriggerScroller, initGsapPlugins } from '@/lib/gsap-init'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 const valueClass =
@@ -26,6 +26,8 @@ export function CommercialStatsStrip() {
     const pctEl = pctRef.current
     if (!section || !c1 || !c2 || !c3 || !pctEl) return
 
+    const scroller = getScrollTriggerScroller()
+
     const ctx = gsap.context(() => {
       if (reduced) {
         gsap.set([c1, c2, c3], { clearProps: 'all' })
@@ -40,6 +42,7 @@ export function CommercialStatsStrip() {
       const counter = { n: 0 }
       const tl = gsap.timeline({
         scrollTrigger: {
+          scroller,
           trigger: section,
           start: 'top 78%',
           once: true,

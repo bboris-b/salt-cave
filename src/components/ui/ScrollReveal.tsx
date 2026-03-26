@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, type ReactNode } from 'react'
-import { gsap, initGsapPlugins } from '@/lib/gsap-init'
+import { gsap, getScrollTriggerScroller, initGsapPlugins } from '@/lib/gsap-init'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 type Direction = 'up' | 'left' | 'right'
@@ -39,6 +39,8 @@ export function ScrollReveal({
       return
     }
 
+    const scroller = getScrollTriggerScroller()
+
     const ctx = gsap.context(() => {
       const childEls = Array.from(el.children) as HTMLElement[]
       const targets = childEls.length > 0 ? childEls : [el]
@@ -55,6 +57,7 @@ export function ScrollReveal({
           duration: duration / 1000,
           delay: (delay + i * stagger) / 1000,
           scrollTrigger: {
+            scroller,
             trigger: el,
             start: 'top 80%',
             once: true,

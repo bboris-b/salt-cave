@@ -9,7 +9,7 @@ function localBusinessJsonLd(siteUrl: string) {
     '@type': 'HealthAndBeautyBusiness',
     name: BUSINESS.name,
     description:
-      'Centro di haloterapia a Roma: grotta di sale, microclima controllato, benessere respiratorio.',
+      'Grotta di sale terapeutica a Roma: microclima controllato, benessere respiratorio.',
     url: siteUrl,
     image: `${siteUrl}/opengraph-image`,
     telephone: BUSINESS.telephone,

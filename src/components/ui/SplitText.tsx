@@ -2,7 +2,7 @@
 
 import { createElement, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import SplitType from 'split-type'
-import { gsap, ScrollTrigger, initGsapPlugins } from '@/lib/gsap-init'
+import { gsap, ScrollTrigger, getScrollTriggerScroller, initGsapPlugins } from '@/lib/gsap-init'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 export type SplitTextType = 'words' | 'chars' | 'lines'
@@ -80,6 +80,8 @@ export function SplitText({
 
       if (!targets?.length) return
 
+      const scroller = getScrollTriggerScroller()
+
       ctxRef.current = gsap.context(() => {
         gsap.from(targets, {
           y,
@@ -89,6 +91,7 @@ export function SplitText({
           delay,
           ease,
           scrollTrigger: {
+            scroller,
             trigger: el,
             start: 'top 85%',
             once: true,

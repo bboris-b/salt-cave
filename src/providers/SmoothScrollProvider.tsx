@@ -81,6 +81,10 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
       },
     })
 
+    /** Obbligatorio con scrollerProxy: altrimenti clip-path / scrub non seguono lo scroll Lenis. */
+    ScrollTrigger.defaults({ scroller })
+    queueMicrotask(() => ScrollTrigger.refresh())
+
     const onTicker = (time: number) => {
       instance.raf(time * 1000)
     }
@@ -89,6 +93,7 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
 
     return () => {
       gsap.ticker.remove(onTicker)
+      ScrollTrigger.defaults({ scroller: undefined })
       ScrollTrigger.scrollerProxy(scroller, {})
       instance.destroy()
       setLenis(null)

@@ -30,6 +30,23 @@ export function breathWaveshape(angle: number, tSec: number, drive = 1): number 
   return sum * 0.94
 }
 
+/**
+ * Increspatura che si propaga lungo il perimetro (solo modi azimutali in fase con il tempo).
+ * Evita offset radiali uniformi che fanno “traballare” tutto l’anello sul volume.
+ */
+export function travelingRipple(angle: number, tSec: number, strength: number, drive = 1): number {
+  const s = Math.max(0, Math.min(1, strength))
+  if (s < 0.004) return 0
+  const d = Math.max(0, Math.min(1, drive))
+  const spd = 0.95 + d * 0.75
+  const ph = tSec * spd
+  const w =
+    Math.sin(angle * 3 - ph * 1.05) * 0.5 +
+    Math.sin(angle * 5 - ph * 0.92) * 0.32 +
+    Math.sin(angle * 7 + ph * 0.35) * 0.18
+  return w * s * 1.02
+}
+
 /** Costruisce path chiuso con quadraticCurveTo; controllo = punto polare a θ medio */
 export function buildRingPath(
   ctx: CanvasRenderingContext2D,

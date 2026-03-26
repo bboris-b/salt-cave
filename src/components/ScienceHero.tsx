@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef } from 'react'
 import SplitType from 'split-type'
-import { gsap, ScrollTrigger, initGsapPlugins } from '@/lib/gsap-init'
+import { gsap, ScrollTrigger, getScrollTriggerScroller, initGsapPlugins } from '@/lib/gsap-init'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 const TITLE = 'Il tuo respiro merita uno spazio diverso.'
@@ -55,9 +55,6 @@ export function ScienceHero() {
     let splitTitle: SplitType | null = null
     let splitNarrative: SplitType | null = null
 
-    const narrowVisual =
-      typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
-
     const ctx = gsap.context(() => {
       if (reduced) {
         gsap.set(
@@ -75,6 +72,9 @@ export function ScienceHero() {
       gsap.set(ctaEl, { y: 20 })
       gsap.set([narrativeEl, dataEl, haloEl], { autoAlpha: 0 })
       gsap.set(dataEl, { x: -20 })
+
+      /** Allineato al proxy Lenis su <html>; senza questo clip-path/scrub restano “morti”. */
+      const scroller = getScrollTriggerScroller()
 
       splitTitle = new SplitType(titleEl, { types: 'words', tagName: 'span' })
       const words = splitTitle.words
@@ -125,45 +125,63 @@ export function ScienceHero() {
           )
         }
 
-        if (narrowVisual) {
-          gsap.set(clipEl, { clipPath: 'inset(0% 0% 0% 0%)' })
-          gsap.fromTo(
-            clipEl,
-            { autoAlpha: 0 },
-            {
-              autoAlpha: 1,
-              duration: 1,
-              ease: 'power2.out',
+        const visualScrollTrigger = {
+          scroller,
+          trigger: clipEl,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true,
+        } as const
+
+        /**
+         * Desktop: clip-path reveal + parallax pieno.
+         * Mobile: fade (meno reflow) + parallasse quasi nullo (motion).
+         * matchMedia aggiorna se ridimensioni la finestra.
+         */
+        ScrollTrigger.matchMedia({
+          '(max-width: 767px)': function mobileVisual() {
+            gsap.set(clipEl, { clipPath: 'inset(0% 0% 0% 0%)' })
+            gsap.fromTo(
+              clipEl,
+              { autoAlpha: 0 },
+              {
+                autoAlpha: 1,
+                duration: 1,
+                ease: 'power2.out',
+                scrollTrigger: {
+                  scroller,
+                  trigger: clipEl,
+                  start: 'top 85%',
+                  toggleActions: 'play none none none',
+                },
+                onComplete: overlayAfterReveal,
+              },
+            )
+            gsap.to(parallaxEl, {
+              yPercent: -0.75,
+              ease: 'none',
+              scrollTrigger: { ...visualScrollTrigger },
+            })
+          },
+          '(min-width: 768px)': function desktopVisual() {
+            gsap.set(clipEl, { clipPath: 'inset(0 0 100% 0)' })
+            gsap.to(clipEl, {
+              clipPath: 'inset(0% 0% 0% 0%)',
+              duration: 1.4,
+              ease: 'power4.inOut',
               scrollTrigger: {
+                scroller,
                 trigger: clipEl,
-                start: 'top 85%',
+                start: 'top 80%',
                 toggleActions: 'play none none none',
               },
               onComplete: overlayAfterReveal,
-            },
-          )
-        } else {
-          gsap.from(clipEl, {
-            clipPath: 'inset(0 0 100% 0)',
-            duration: 1.4,
-            ease: 'power4.inOut',
-            scrollTrigger: {
-              trigger: clipEl,
-              start: 'top 85%',
-              toggleActions: 'play none none none',
-            },
-            onComplete: overlayAfterReveal,
-          })
-        }
-
-        gsap.to(parallaxEl, {
-          yPercent: narrowVisual ? -15 * 0.05 : -15,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: clipEl,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: true,
+            })
+            gsap.to(parallaxEl, {
+              yPercent: -18,
+              ease: 'none',
+              scrollTrigger: { ...visualScrollTrigger },
+            })
           },
         })
       }
@@ -178,6 +196,7 @@ export function ScienceHero() {
           stagger: 0.08,
           ease: 'power4.out',
           scrollTrigger: {
+            scroller,
             trigger: narrativeEl,
             start: 'top 78%',
             once: true,
@@ -189,6 +208,7 @@ export function ScienceHero() {
 
       const tailTl = gsap.timeline({
         scrollTrigger: {
+          scroller,
           trigger: dataEl,
           start: 'top 82%',
           once: true,
@@ -231,18 +251,20 @@ export function ScienceHero() {
         </p>
       </div>
 
-      {/* VIEWPORT 2 — visual full-bleed */}
-      <div className="hero-full-bleed my-16 md:my-24">
+      {/* VIEWPORT 2 — visual full-bleed (100vw); foto: sostituire il layer placeholder in .hero-visual-media */}
+      <div className="hero-full-bleed my-16 md:my-28">
         <div
           ref={visualClipRef}
-          className="hero-visual relative w-full overflow-hidden bg-cave-black aspect-video max-md:aspect-[4/3]"
+          className="hero-visual relative w-full overflow-hidden bg-cave-black min-h-[40vh] aspect-[4/3] md:aspect-auto md:min-h-[min(78vh,920px)]"
         >
           <div
             ref={visualParallaxRef}
-            className="will-change-transform absolute inset-x-0 left-0 right-0 top-[-8%] h-[116%] w-full"
+            className="will-change-transform absolute inset-x-0 left-0 right-0 top-[-12%] h-[124%] w-full md:top-[-10%] md:h-[120%]"
             aria-hidden
           >
-            <div className="hero-sensorial-radial" />
+            <div className="hero-visual-media pointer-events-none absolute inset-0">
+              <div className="hero-sensorial-radial" />
+            </div>
             <div className="hero-visual-grain pointer-events-none absolute inset-0 z-[1]" />
           </div>
           <p

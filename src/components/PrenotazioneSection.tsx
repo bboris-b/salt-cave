@@ -10,7 +10,7 @@ import {
   useState,
 } from 'react'
 import SplitType from 'split-type'
-import { gsap, initGsapPlugins } from '@/lib/gsap-init'
+import { gsap, getScrollTriggerScroller, initGsapPlugins } from '@/lib/gsap-init'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { getBookingPackageLabel } from '@/lib/bookingPackage'
 import { getTimeSlotsForDate, type TimeSlot } from '@/lib/staticAvailability'
@@ -316,9 +316,11 @@ export function PrenotazioneSection() {
       gsap.set(subIn, { yPercent: 100 })
 
       const titleEnd = (words.length - 1) * WORD_STAGGER + WORD_DURATION
+      const scroller = getScrollTriggerScroller()
 
       const tl = gsap.timeline({
         scrollTrigger: {
+          scroller,
           trigger: section,
           start: 'top 75%',
           once: true,
@@ -365,8 +367,11 @@ export function PrenotazioneSection() {
         return
       }
       gsap.set([cal, form], { autoAlpha: 0, y: 40 })
+      const scroller = getScrollTriggerScroller()
+
       const tl = gsap.timeline({
         scrollTrigger: {
+          scroller,
           trigger: section,
           start: 'top 72%',
           once: true,
