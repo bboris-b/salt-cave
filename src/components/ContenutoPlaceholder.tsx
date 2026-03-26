@@ -30,7 +30,7 @@ export function ContenutoPlaceholder({ animateIn }: Props) {
       </h1>
       <p className="mt-4 max-w-md text-sm text-text-secondary">Continua a seguirci — il sito completo è in arrivo</p>
       <Link
-        href={routes.intro}
+        href={routes.home}
         className="mt-10 font-sans text-sm text-text-muted underline-offset-4 transition-colors hover:text-text-secondary hover:underline"
       >
         ← Torna all&apos;intro

@@ -5,10 +5,16 @@ import { ScrollToTop } from '@/components/ScrollToTop'
 import { SiteFooter } from '@/components/SiteFooter'
 import { StickyCtaMobile } from '@/components/StickyCtaMobile'
 
-export function SiteShell({ children }: { children: ReactNode }) {
+type SiteShellProps = {
+  children: ReactNode
+  /** Solo homepage: navbar dopo l’intro, con animazione d’ingresso. */
+  navbarEntrance?: 'immediate' | 'fadeUp'
+}
+
+export function SiteShell({ children, navbarEntrance = 'immediate' }: SiteShellProps) {
   return (
     <>
-      <Navbar />
+      <Navbar entrance={navbarEntrance} />
       <div className="relative z-[1] min-h-dvh bg-transparent pt-[4.25rem]">
         <AnimateWeightTitles />
         {children}

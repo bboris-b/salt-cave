@@ -1,14 +1,24 @@
 'use client'
 
 import { useLayoutEffect, useRef } from 'react'
+import Link from 'next/link'
 import SplitType from 'split-type'
 import { gsap, ScrollTrigger, getScrollTriggerScroller, initGsapPlugins } from '@/lib/gsap-init'
+import { routes } from '@/lib/routes'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
-const TITLE = 'Il tuo respiro merita uno spazio diverso.'
+const DEFAULT_TITLE = 'Il tuo respiro merita uno spazio diverso.'
 
-const SUBTITLE =
+const DEFAULT_SUBTITLE =
   'La prima grotta di sale terapeutica nel cuore di Roma. 45 minuti che cambiano il modo in cui respiri.'
+
+export type ScienceHeroProps = {
+  sectionId?: string
+  title?: string
+  subtitle?: string
+  ctaHref?: string
+  ctaLabel?: string
+}
 
 const WORD_STAGGER = 0.1
 const WORD_DURATION = 0.8
@@ -16,7 +26,13 @@ const WORD_DURATION = 0.8
 const ctaClass =
   'cta-focus-visible inline-flex items-center justify-center rounded-[100px] bg-[var(--accent-cta)] px-9 py-4 font-sans text-[15px] font-medium leading-none text-cave-black transition-colors duration-300 hover:bg-[var(--accent-cta-hover)]'
 
-export function ScienceHero() {
+export function ScienceHero({
+  sectionId = 'esperienza',
+  title = DEFAULT_TITLE,
+  subtitle = DEFAULT_SUBTITLE,
+  ctaHref = routes.prenota,
+  ctaLabel = 'Prenota la tua prima seduta',
+}: ScienceHeroProps) {
   const reduced = usePrefersReducedMotion()
   const sectionRef = useRef<HTMLElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
@@ -166,14 +182,14 @@ export function ScienceHero() {
       ctx.revert()
       splitTitle?.revert()
     }
-  }, [reduced])
+  }, [reduced, title, subtitle])
 
   return (
-    <section ref={sectionRef} id="esperienza" className="scroll-mt-24" aria-labelledby="science-hero-title">
+    <section ref={sectionRef} id={sectionId} className="scroll-mt-24" aria-labelledby="science-hero-title">
       <div className="mx-auto max-w-[800px] px-5 pb-10 pt-[12vh] md:pb-14 md:pt-[18vh]">
         <div className="hero-title-var-wrap">
           <h1 id="science-hero-title" ref={titleRef} className="animate-weight type-hero-ingresso">
-            {TITLE}
+            {title}
           </h1>
         </div>
 
@@ -181,12 +197,12 @@ export function ScienceHero() {
           ref={subtitleRef}
           className="mt-6 max-w-[540px] font-sans font-normal leading-relaxed text-[var(--text-secondary)] [font-size:clamp(1rem,1.2vw,1.15rem)]"
         >
-          {SUBTITLE}
+          {subtitle}
         </p>
 
-        <a ref={ctaRef} href="#prenotazione" className={`${ctaClass} mt-8`}>
-          Prenota la tua prima seduta
-        </a>
+        <Link ref={ctaRef} href={ctaHref} className={`${ctaClass} mt-8 inline-flex`}>
+          {ctaLabel}
+        </Link>
 
         <p ref={microRef} className="mt-4 font-sans text-[13px] font-normal leading-relaxed text-[var(--text-muted)]">
           Da €25 · Annullamento gratuito · Risposta in 1h

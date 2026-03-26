@@ -323,7 +323,7 @@ export function GrottaExperience() {
     }, 400)
     window.setTimeout(() => setBgMigrated(true), 800)
     window.setTimeout(() => {
-      router.push(`${routes.contenuto}?from=esperienza`)
+      router.push(`${routes.home}?from=esperienza`)
     }, 1500)
   }
 
@@ -332,7 +332,7 @@ export function GrottaExperience() {
   const goToContenuto = () => {
     clearBreathingData()
     analyzerRef.current?.stop()
-    router.push(routes.contenuto)
+    router.push(routes.home)
   }
 
   const micOpen = phase === 'noise_calib' || phase === 'noise_warn' || phase === 'session'

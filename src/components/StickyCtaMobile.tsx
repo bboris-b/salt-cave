@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { gsap, initGsapPlugins } from '@/lib/gsap-init'
+import { routes } from '@/lib/routes'
 import { useSmoothScroll } from '@/providers/SmoothScrollContext'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 export function StickyCtaMobile() {
@@ -52,12 +54,12 @@ export function StickyCtaMobile() {
       style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
     >
       <p className="min-w-0 flex-1 font-sans text-sm font-normal text-text-primary">Prenota la tua seduta</p>
-      <a
-        href="#prenotazione"
+      <Link
+        href={routes.prenota}
         className="cta-focus-visible shrink-0 rounded-[100px] bg-[var(--accent-cta)] px-5 py-2 font-sans text-xs font-medium text-cave-black transition-colors duration-300 hover:bg-[var(--accent-cta-hover)]"
       >
         Prenota
-      </a>
+      </Link>
     </div>
   )
 }

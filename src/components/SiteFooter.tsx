@@ -1,19 +1,15 @@
 'use client'
 
 import { useId, useLayoutEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { gsap, initGsapPlugins } from '@/lib/gsap-init'
 import { FOOTER_FAQ_ITEMS } from '@/lib/footer-faq'
+import { MAIN_NAV, routes } from '@/lib/routes'
 import { BUSINESS, SOCIAL, googleMapsUrl } from '@/lib/site-config'
 import { getWhatsAppDigits } from '@/lib/whatsappBooking'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
-const NAV_LINKS = [
-  { href: '#esperienza', label: "L'esperienza" },
-  { href: '#benefici', label: 'Benefici' },
-  { href: '#prezzi', label: 'Prezzi' },
-  { href: '#prenotazione', label: 'Prenota' },
-  { href: '#chi-siamo', label: 'Chi siamo' },
-] as const
+const FOOTER_MORE = [{ href: `${routes.home}#chi-siamo`, label: 'Chi siamo' }] as const
 
 function IconInstagram({ className }: { className?: string }) {
   return (
@@ -165,15 +161,25 @@ export function SiteFooter() {
           <nav aria-label="Esplora il sito">
             <p className="font-sans text-sm font-medium text-text-primary">Esplora</p>
             <ul className="mt-4 flex flex-col gap-3">
-              {NAV_LINKS.map((item) => (
+              {MAIN_NAV.map((item) => (
                 <li key={item.href}>
-                  <a
+                  <Link
                     href={item.href}
                     className={
-                      item.href === '#prenotazione'
+                      item.href === routes.prenota
                         ? 'cta-focus-visible font-sans text-sm font-normal text-text-secondary transition-colors duration-200 hover:text-salt-pink'
                         : 'font-sans text-sm font-normal text-text-secondary transition-colors duration-200 hover:text-salt-pink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-dark'
                     }
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              {FOOTER_MORE.map((item) => (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    className="font-sans text-sm font-normal text-text-secondary transition-colors duration-200 hover:text-salt-pink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-dark"
                   >
                     {item.label}
                   </a>
@@ -229,9 +235,34 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <p className="mt-14 border-t border-cave-charcoal/60 pt-8 text-center font-sans text-xs font-normal text-text-muted">
-          © {new Date().getFullYear()} Grotta di Sale Roma. P.IVA {BUSINESS.piva}
-        </p>
+        <div className="mt-14 border-t border-cave-charcoal/60 pt-8">
+          <p className="text-center font-sans text-xs font-normal text-text-muted">
+            © {new Date().getFullYear()} Grotta di Sale Roma. P.IVA {BUSINESS.piva}
+          </p>
+          <nav
+            aria-label="Informazioni legali"
+            className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-sans text-xs font-normal text-text-muted"
+          >
+            <Link
+              href={routes.privacy}
+              className="transition-colors duration-200 hover:text-salt-pink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-dark"
+            >
+              Privacy policy
+            </Link>
+            <Link
+              href={routes.cookiePolicy}
+              className="transition-colors duration-200 hover:text-salt-pink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-dark"
+            >
+              Cookie policy
+            </Link>
+            <Link
+              href={routes.termini}
+              className="transition-colors duration-200 hover:text-salt-pink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-salt-pink focus-visible:ring-offset-2 focus-visible:ring-offset-cave-dark"
+            >
+              Termini e condizioni
+            </Link>
+          </nav>
+        </div>
       </div>
     </footer>
   )

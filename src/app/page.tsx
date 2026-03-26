@@ -1,30 +1,14 @@
-'use client'
+import { Suspense } from 'react'
+import { HomeClient } from '@/app/home-client'
 
-import { useState } from 'react'
-import { IntroScreen } from '@/components/IntroScreen'
-import { SiteShell } from '@/components/SiteShell'
-import { MarketingSections } from '@/components/MarketingSections'
-import { useBreathingData } from '@/providers/BreathingDataProvider'
+function HomeFallback() {
+  return <div className="min-h-dvh bg-transparent" aria-busy aria-label="Caricamento" />
+}
 
 export default function HomePage() {
-  const [showIntro, setShowIntro] = useState(true)
-  const { clearBreathingData } = useBreathingData()
-
-  if (showIntro) {
-    return (
-      <IntroScreen
-        variant="embedded"
-        onSkipToSite={() => {
-          clearBreathingData()
-          setShowIntro(false)
-        }}
-      />
-    )
-  }
-
   return (
-    <SiteShell>
-      <MarketingSections />
-    </SiteShell>
+    <Suspense fallback={<HomeFallback />}>
+      <HomeClient />
+    </Suspense>
   )
 }

@@ -1,10 +1,11 @@
 'use client'
 
 import { useLayoutEffect, useRef, type ReactNode } from 'react'
+import Link from 'next/link'
 import { gsap, getScrollTriggerScroller, initGsapPlugins } from '@/lib/gsap-init'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
-import { useSmoothScroll } from '@/providers/SmoothScrollContext'
 import { SITE_GRID_GAP, SITE_GRID_WRAP } from '@/lib/page-layout'
+import { routes } from '@/lib/routes'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
 
 function CheckIcon({ className = '' }: { className?: string }) {
@@ -70,23 +71,10 @@ const STEPS = [
 
 export function BeneficiPinnedSection() {
   const reduced = usePrefersReducedMotion()
-  const smooth = useSmoothScroll()
   const sectionRef = useRef<HTMLElement>(null)
   const pinHostRef = useRef<HTMLDivElement>(null)
   const pinPanelRef = useRef<HTMLDivElement>(null)
   const stepRefs = useRef<(HTMLDivElement | null)[]>([])
-
-  const scrollToPrezzi = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
-    const el = document.querySelector('#prezzi')
-    if (!(el instanceof HTMLElement)) return
-    if (smooth?.lenis) {
-      smooth.lenis.scrollTo(el, { offset: -72, duration: 1.15 })
-    } else {
-      const top = el.getBoundingClientRect().top + window.scrollY - 72
-      window.scrollTo({ top, behavior: 'smooth' })
-    }
-  }
 
   useLayoutEffect(() => {
     initGsapPlugins()
@@ -208,13 +196,12 @@ export function BeneficiPinnedSection() {
           <p className="font-display text-xl font-normal text-[var(--salt-warm)] [font-variation-settings:'wght'_400,'opsz'_40,'WONK'_0,'SOFT'_0]">
             Hai trovato il tuo motivo?
           </p>
-          <a
-            href="#prezzi"
-            onClick={scrollToPrezzi}
+          <Link
+            href={routes.servizi}
             className="cta-focus-visible mt-6 inline-flex items-center justify-center rounded-[100px] border border-[var(--accent-cta)] bg-transparent px-8 py-3 font-sans text-sm font-medium text-[var(--accent-cta)] transition-colors duration-300 hover:bg-[var(--accent-cta)] hover:text-cave-black"
           >
             Scopri i pacchetti
-          </a>
+          </Link>
         </ScrollReveal>
       </div>
     </section>

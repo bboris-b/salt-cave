@@ -10,11 +10,13 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react'
+import Link from 'next/link'
 import { gsap, initGsapPlugins } from '@/lib/gsap-init'
 import { Button } from '@/components/ui/Button'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { setBookingPackageLabel } from '@/lib/bookingPackage'
 import { SITE_GRID_WRAP } from '@/lib/page-layout'
+import { routes } from '@/lib/routes'
 
 const bookingLinkBase =
   'cta-focus-visible flex w-full items-center justify-center text-center font-sans text-sm font-medium transition-colors duration-300'
@@ -448,13 +450,13 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
                   <CheckLi>Bambini 0–7 gratis</CheckLi>
                 </ul>
                 <div className="mt-auto pt-8">
-                  <a
-                    href="#prenotazione"
+                  <Link
+                    href={routes.prenota}
                     onClick={() => setBookingPackageLabel('Scoperta')}
                     className={`${bookingOutline} !py-3`}
                   >
                     Prenota
-                  </a>
+                  </Link>
                 </div>
               </article>
 
@@ -478,13 +480,13 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
                   <CheckLi>Promemoria sedute</CheckLi>
                 </ul>
                 <div className="mt-auto pt-8">
-                  <a
-                    href="#prenotazione"
+                  <Link
+                    href={routes.prenota}
                     onClick={() => setBookingPackageLabel('Percorso')}
                     className={`${bookingSolid} !py-3`}
                   >
                     Inizia il percorso
-                  </a>
+                  </Link>
                 </div>
               </article>
 
@@ -502,13 +504,13 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
                   <CheckLi>Candele e aromaterapia</CheckLi>
                 </ul>
                 <div className="mt-auto pt-8">
-                  <a
-                    href="#prenotazione"
+                  <Link
+                    href={routes.prenota}
                     onClick={() => setBookingPackageLabel('Esclusiva')}
                     className={`${bookingAmber} !py-3`}
                   >
                     Prenota l&apos;esclusiva
-                  </a>
+                  </Link>
                 </div>
               </article>
             </div>
@@ -521,8 +523,8 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
               <p className="type-display-card text-salt-warm">
                 Hai scelto il tuo percorso? Ora fermiamo il tuo posto.
               </p>
-              <a
-                href="#prenotazione"
+              <Link
+                href={routes.prenota}
                 className="cta-focus-visible mx-auto mt-6 flex w-8 justify-center text-text-muted rounded-full"
                 aria-label="Vai alla prenotazione"
               >
@@ -538,7 +540,7 @@ export function PrezziPacchettiSection({ breathingPersonalizedMessage = null }: 
                     />
                   </svg>
                 </span>
-              </a>
+              </Link>
             </div>
           </div>
         </div>

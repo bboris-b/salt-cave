@@ -56,7 +56,7 @@ export function IntroScreen({ variant = 'default', onSkipToSite }: IntroScreenPr
             </button>
           ) : (
             <Link
-              href={routes.contenuto}
+              href={routes.home}
               className="mt-5 block w-full text-center font-sans text-sm font-normal text-text-muted underline-offset-4 transition-colors hover:text-text-secondary hover:underline"
             >
               Vai direttamente al sito →

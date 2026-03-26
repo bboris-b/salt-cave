@@ -1,28 +1,23 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { gsap, initGsapPlugins } from '@/lib/gsap-init'
+import { MAIN_NAV, routes } from '@/lib/routes'
 import { useSmoothScroll } from '@/providers/SmoothScrollContext'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
-const LINKS = [
-  { href: '#esperienza', label: "L'esperienza" },
-  { href: '#benefici', label: 'Benefici' },
-  { href: '#prezzi', label: 'Prezzi' },
-] as const
+type NavbarProps = {
+  /** Sulla homepage, dopo l'intro: entrata fade + translateY. Sulle altre pagine: subito visibile. */
+  entrance?: 'immediate' | 'fadeUp'
+}
 
-const ctaClass =
-  'cta-focus-visible inline-flex items-center justify-center rounded-[100px] bg-[var(--accent-cta)] px-7 py-2.5 font-sans text-sm font-medium text-cave-black transition-colors duration-300 hover:bg-[var(--accent-cta-hover)]'
-
-const ctaMobileClass =
-  'cta-focus-visible flex w-full max-w-sm items-center justify-center rounded-[100px] bg-[var(--accent-cta)] py-4 text-center font-sans text-base font-medium text-cave-black transition-colors duration-300 hover:bg-[var(--accent-cta-hover)]'
-
-export function Navbar() {
+export function Navbar({ entrance = 'immediate' }: NavbarProps) {
   const smooth = useSmoothScroll()
   const reduced = usePrefersReducedMotion()
   const [solid, setSolid] = useState(false)
   const [open, setOpen] = useState(false)
+  const innerRef = useRef<HTMLDivElement>(null)
   const line1 = useRef<HTMLSpanElement>(null)
   const line2 = useRef<HTMLSpanElement>(null)
   const line3 = useRef<HTMLSpanElement>(null)
@@ -30,6 +25,21 @@ export function Navbar() {
   const itemsRef = useRef<(HTMLAnchorElement | null)[]>([])
 
   const scroll = smooth?.scroll ?? 0
+
+  useLayoutEffect(() => {
+    const el = innerRef.current
+    if (!el) return
+    if (entrance !== 'fadeUp' || reduced) {
+      gsap.set(el, { clearProps: 'opacity,transform' })
+      return
+    }
+    initGsapPlugins()
+    gsap.fromTo(
+      el,
+      { autoAlpha: 0, y: -20 },
+      { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out', delay: 0.06 },
+    )
+  }, [entrance, reduced])
 
   useEffect(() => {
     setSolid(scroll > 60)
@@ -122,32 +132,33 @@ export function Navbar() {
       className="fixed left-0 right-0 top-0 z-[100] transition-[background-color,border-color,backdrop-filter] duration-[400ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)]"
       style={barStyle}
     >
-      <div className="mx-auto flex h-[4.25rem] max-w-6xl items-center justify-between gap-4 px-5 lg:gap-8 lg:px-8">
-        <Link href="/" className="type-nav-logo shrink-0 text-salt-warm">
+      <div
+        ref={innerRef}
+        className="relative mx-auto flex h-[4.25rem] max-w-6xl items-center justify-between gap-4 px-5 lg:px-8"
+        style={entrance === 'fadeUp' && !reduced ? { opacity: 0 } : undefined}
+      >
+        <Link href={routes.home} className="type-nav-logo relative z-[110] shrink-0 text-salt-warm">
           Grotta di Sale
         </Link>
 
-        <nav className="hidden flex-1 justify-center lg:flex" aria-label="Principale">
-          <ul className="flex items-center gap-10">
-            {LINKS.map((item) => (
+        <nav
+          className="pointer-events-none absolute inset-x-0 top-0 hidden h-full items-center justify-center lg:flex"
+          aria-label="Principale"
+        >
+          <ul className="pointer-events-auto flex items-center gap-10">
+            {MAIN_NAV.map((item) => (
               <li key={item.href}>
-                <a href={item.href} className="nav-link font-sans text-sm font-normal text-text-primary">
+                <Link href={item.href} className="nav-link font-sans text-sm font-normal text-text-primary">
                   {item.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
         </nav>
 
-        <div className="hidden shrink-0 lg:block">
-          <a href="#prenotazione" className={ctaClass}>
-            Prenota ora
-          </a>
-        </div>
-
         <button
           type="button"
-          className="relative z-[110] flex h-11 w-11 flex-col items-center justify-center gap-1.5 lg:hidden"
+          className="relative z-[110] flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-1.5 lg:hidden"
           aria-expanded={open}
           aria-controls="mobile-menu"
           aria-label={open ? 'Chiudi menu' : 'Apri menu'}
@@ -168,8 +179,8 @@ export function Navbar() {
       >
         <div className="flex flex-1 flex-col justify-center px-8 pb-6 pt-[4.5rem]">
           <nav className="flex flex-col items-center gap-10" aria-label="Mobile">
-            {LINKS.map((item, i) => (
-              <a
+            {MAIN_NAV.map((item, i) => (
+              <Link
                 key={item.href}
                 ref={(el) => {
                   itemsRef.current[i] = el
@@ -179,18 +190,9 @@ export function Navbar() {
                 onClick={() => setOpen(false)}
               >
                 {item.label}
-              </a>
+              </Link>
             ))}
           </nav>
-        </div>
-        <div className="shrink-0 border-t border-cave-charcoal/50 px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6">
-          <a
-            href="#prenotazione"
-            className={ctaMobileClass}
-            onClick={() => setOpen(false)}
-          >
-            Prenota ora
-          </a>
         </div>
       </div>
     </header>

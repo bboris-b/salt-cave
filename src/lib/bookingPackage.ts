@@ -1,4 +1,4 @@
-/** Session storage: pacchetto scelto prima di aprire #prenotazione */
+/** Session storage: pacchetto scelto prima di aprire la pagina prenotazione */
 
 export const BOOKING_PACKAGE_STORAGE_KEY = 'salt-cave-selected-package'
 
